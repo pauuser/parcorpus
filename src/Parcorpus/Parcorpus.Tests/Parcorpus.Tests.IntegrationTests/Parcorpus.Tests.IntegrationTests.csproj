@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Parcorpus.Tests.IntegrationTests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Moq" Version="4.20.69" />
+      <PackageReference Include="xunit.assert" Version="2.5.1-pre.26" />
+      <PackageReference Include="xunit.core" Version="2.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.DataAccess\Parcorpus.DataAccess.Context\Parcorpus.DataAccess.Context.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.DataAccess\Parcorpus.DataAccess.Repositories\Parcorpus.DataAccess.Repositories.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.AuthService\Parcorpus.Services.AuthService.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.LanguageService\Parcorpus.Services.LanguageService.csproj" />
+    </ItemGroup>
+    
+</Project>

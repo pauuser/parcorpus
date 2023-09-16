@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Parcorpus.DataAccess.Converters</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Models\Parcorpus.Core.Models.csproj" />
+      <ProjectReference Include="..\Parcorpus.DataAccess.Models\Parcorpus.DataAccess.Models.csproj" />
+    </ItemGroup>
+
+</Project>

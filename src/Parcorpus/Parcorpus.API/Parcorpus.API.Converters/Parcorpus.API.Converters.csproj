@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Parcorpus.API.Converters</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Models\Parcorpus.Core.Models.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.Helpers\Parcorpus.Services.Helpers.csproj" />
+      <ProjectReference Include="..\Parcorpus.API.Dto\Parcorpus.API.Dto.csproj" />
+    </ItemGroup>
+
+</Project>

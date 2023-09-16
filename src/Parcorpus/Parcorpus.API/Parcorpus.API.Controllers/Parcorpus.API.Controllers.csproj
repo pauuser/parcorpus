@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>Parcorpus.API.Controllers</RootNamespace>
+        <DocumentationFile>bin\Parcorpus.API.Controllers.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.0.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Exceptions\Parcorpus.Core.Exceptions.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.Helpers\Parcorpus.Services.Helpers.csproj" />
+      <ProjectReference Include="..\Parcorpus.API.Converters\Parcorpus.API.Converters.csproj" />
+      <ProjectReference Include="..\Parcorpus.API.Dto\Parcorpus.API.Dto.csproj" />
+    </ItemGroup>
+
+
+</Project>

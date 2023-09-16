@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Parcorpus.Services.AuthService</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.API\Parcorpus.API.Converters\Parcorpus.API.Converters.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Exceptions\Parcorpus.Core.Exceptions.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
+    </ItemGroup>
+
+</Project>

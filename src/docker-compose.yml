@@ -1,0 +1,121 @@
+version: '3.7'
+
+volumes:
+    postgres:
+    certs:
+      driver: local
+    esdata01:
+      driver: local
+    kibanadata:
+      driver: local
+
+networks:
+  backend-network:
+    driver: "bridge"
+  default:
+    name: elastic
+    external: false
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: parcorpusdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - 'postgres:/data/postgres'
+    ports:
+      - "5434:5432"
+    restart: unless-stopped
+    networks:
+      - backend-network
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: elasticsearch
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      - node.name=es01
+      - cluster.name=${CLUSTER_NAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.license.self_generated.type=${LICENSE}
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    depends_on:
+      - es01
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: kibana
+    volumes:
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+    mem_limit: ${KB_MEM_LIMIT}
+  
+  grafana:
+    depends_on:
+      - postgres
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    user: '0'
+    ports:
+      - '3000:3000'
+    volumes:
+      - '/data:/var/lib/grafana'
+    networks:
+      - backend-network
+  
+  backend:
+    container_name: parcorpus-backend
+    build: './Parcorpus/'
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING}
+      - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
+      - ELASTIC_URL=${ELASTIC_URL}
+    volumes:
+      - './Parcorpus/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
+      - './Parcorpus/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
+      - './Parcorpus/Parcorpus.API/logs:/app/log'
+    depends_on:
+      - postgres
+      - es01 
+      - grafana
+      - kibana
+      - aligner
+    networks:
+      - backend-network
+    ports:
+      - 446:443
+      - 802:80
+  
+  aligner:
+    build: ./Parcorpus/Parcorpus.Services/Parcorpus.Services.AnnotationService/WordAlignerServer
+    volumes:
+        - ./Parcorpus/Parcorpus.Services/Parcorpus.Services.AnnotationService/WordAlignerServer:/usr/app/
+    networks:
+      - backend-network

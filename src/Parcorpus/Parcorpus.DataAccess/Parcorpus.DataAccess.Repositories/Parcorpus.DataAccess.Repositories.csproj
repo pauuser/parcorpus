@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Parcorpus.DB</RootNamespace>
+        <RootNamespace>Parcorpus.DataAccess.Repositories</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Exceptions\Parcorpus.Core.Exceptions.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.Helpers\Parcorpus.Services.Helpers.csproj" />
+      <ProjectReference Include="..\Parcorpus.DataAccess.Context\Parcorpus.DataAccess.Context.csproj" />
+      <ProjectReference Include="..\Parcorpus.DataAccess.Converters\Parcorpus.DataAccess.Converters.csproj" />
+      <ProjectReference Include="..\Parcorpus.DataAccess.Models\Parcorpus.DataAccess.Models.csproj" />
+    </ItemGroup>
+    
+</Project>

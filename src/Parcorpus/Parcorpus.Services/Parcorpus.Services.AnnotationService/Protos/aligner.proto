@@ -1,0 +1,23 @@
+﻿syntax = "proto3";
+
+package aligner;
+
+service WordAligner {
+  rpc AlignWords (SentencesRequest) returns (AlignmentReply) {}
+}
+
+message SentencesRequest {
+  string sourceText = 1;
+  string targetText = 2;
+  string sourceLanguageFullName = 3;
+  string targetLanguageFullName = 4;
+}
+
+message AlignmentReply {
+  message AlignedWord {
+    string sourceWord = 1;
+    string targetWord = 2;
+  }
+  repeated AlignedWord words = 1;
+}
+

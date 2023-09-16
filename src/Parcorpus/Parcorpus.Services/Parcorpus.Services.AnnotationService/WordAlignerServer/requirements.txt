@@ -1,0 +1,6 @@
+setuptools-rust
+pytest
+simalign
+nltk
+grpcio
+protobuf
