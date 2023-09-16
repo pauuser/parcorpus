@@ -32,10 +32,14 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
                 Logger.LogError("User with id = {userId} doesn't exist.", userId);
                 throw new NotFoundException($"User with id = {userId} doesn't exist.");
             }
-        
+
             Logger.LogInformation("User with id = {userId} retrieved successfully.", userId);
 
-            return UserConverter.ConvertDbModelToAppModel(user);
+            return UserConverter.ConvertDbModelToAppModel(user)!;
+        }
+        catch (NotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

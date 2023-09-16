@@ -6,7 +6,7 @@ public class SearchHistoryDbModel
     
     public Guid UserId { get; set; }
 
-    public UserDbModel UserNavigation { get; set; }
+    public virtual UserDbModel UserNavigation { get; set; }
     
     public HistoryJsonDbModel Query { get; set; }
 

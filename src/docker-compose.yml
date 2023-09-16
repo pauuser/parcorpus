@@ -119,3 +119,5 @@ services:
         - ./Parcorpus/Parcorpus.Services/Parcorpus.Services.AnnotationService/WordAlignerServer:/usr/app/
     networks:
       - backend-network
+    ports:
+      - 50051:50051

@@ -72,7 +72,8 @@ public class LanguageService : ILanguageService
             sourceLanguage: text.SourceLanguage,
             targetLanguage: text.TargetLanguage,
             genres: text.Genres,
-            sentences: alignedSentences));
+            sentences: alignedSentences,
+            addedBy: userId));
     }
 
     public async Task DeleteText(Guid userId, int textId)

@@ -19,6 +19,7 @@ public static class TextConverter
             sentences: text.SentencesNavigation.Select(s => SentenceConverter
                 .ConvertDbModelToAppModel(sentence: s, 
                     sourceLanguage: text.LanguagePairNavigation.FromLanguageNavigation, 
-                    targetLanguage: text.LanguagePairNavigation.ToLanguageNavigation)).ToList());
+                    targetLanguage: text.LanguagePairNavigation.ToLanguageNavigation)).ToList(),
+            addedBy: text.AddedBy);
     }
 }

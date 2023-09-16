@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Parcorpus.DataAccess.Context;
@@ -12,9 +13,11 @@ using Parcorpus.DataAccess.Models;
 namespace Parcorpus.DataAccess.Context.Migrations
 {
     [DbContext(typeof(ParcorpusDbContext))]
-    partial class ParcorpusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230916120706_SearchHistoryFixFK")]
+    partial class SearchHistoryFixFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

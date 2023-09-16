@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Parcorpus.DataAccess.Context;
@@ -12,9 +13,11 @@ using Parcorpus.DataAccess.Models;
 namespace Parcorpus.DataAccess.Context.Migrations
 {
     [DbContext(typeof(ParcorpusDbContext))]
-    partial class ParcorpusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230916120444_SearchHistoryFix")]
+    partial class SearchHistoryFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,9 +202,12 @@ namespace Parcorpus.DataAccess.Context.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("UserNavigationUserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("SearchHistoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserNavigationUserId");
 
                     b.ToTable("SearchHistory");
                 });
@@ -377,7 +383,7 @@ namespace Parcorpus.DataAccess.Context.Migrations
                 {
                     b.HasOne("Parcorpus.DataAccess.Models.UserDbModel", "UserNavigation")
                         .WithMany("SearchHistoryNavigation")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserNavigationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -56,6 +56,12 @@ public class TextDto
     public string TargetLanguage { get; set; }
 
     /// <summary>
+    /// User Id of the user who uploaded the text
+    /// </summary>
+    [JsonPropertyName("added_by")]
+    public Guid AddedBy { get; set; }
+
+    /// <summary>
     /// Text DTO constructor
     /// </summary>
     /// <param name="textId">text id</param>
@@ -66,6 +72,7 @@ public class TextDto
     /// <param name="addDate">add date</param>
     /// <param name="sourceLanguage">source language</param>
     /// <param name="targetLanguage">target language</param>
+    /// <param name="addedBy">user id</param>
     public TextDto(int? textId, 
         string? title, 
         string? author, 
@@ -73,7 +80,8 @@ public class TextDto
         int? creationYear, 
         DateTime? addDate, 
         string sourceLanguage, 
-        string targetLanguage)
+        string targetLanguage,
+        Guid addedBy)
     {
         TextId = textId;
         Title = title;
@@ -83,5 +91,6 @@ public class TextDto
         AddDate = addDate;
         SourceLanguage = sourceLanguage;
         TargetLanguage = targetLanguage;
+        AddedBy = addedBy;
     }
 }

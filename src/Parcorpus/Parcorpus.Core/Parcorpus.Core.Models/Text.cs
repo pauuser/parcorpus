@@ -22,6 +22,8 @@ public sealed class Text
 
     public List<Sentence> Sentences { get; set; }
 
+    public Guid AddedBy { get; set; }
+
     public Text(int textId, 
         string title, 
         string author, 
@@ -31,7 +33,8 @@ public sealed class Text
         Language sourceLanguage, 
         Language targetLanguage,
         List<string> genres,
-        List<Sentence> sentences)
+        List<Sentence> sentences,
+        Guid addedBy)
     {
         TextId = textId;
         Title = title;
@@ -43,5 +46,6 @@ public sealed class Text
         TargetLanguage = targetLanguage;
         Genres = genres;
         Sentences = sentences;
+        AddedBy = addedBy;
     }
 }

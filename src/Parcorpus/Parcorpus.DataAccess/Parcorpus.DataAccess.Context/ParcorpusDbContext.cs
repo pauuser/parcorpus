@@ -185,6 +185,10 @@ public partial class ParcorpusDbContext : DbContext
             
             entity.Property(s => s.Query)    
                 .HasColumnType("jsonb");
+
+            entity.HasOne(s => s.UserNavigation)
+                .WithMany(u => u.SearchHistoryNavigation)
+                .HasForeignKey(s => s.UserId);
         });
     }
 }

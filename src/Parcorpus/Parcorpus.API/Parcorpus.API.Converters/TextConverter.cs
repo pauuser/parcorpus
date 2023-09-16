@@ -14,7 +14,8 @@ public static class TextConverter
             creationYear: text.CreationYear, 
             addDate: text.AddDate, 
             sourceLanguage: text.SourceLanguage.ShortName,
-            targetLanguage: text.TargetLanguage.ShortName);
+            targetLanguage: text.TargetLanguage.ShortName,
+            addedBy: text.AddedBy);
     }
 
     public static FullTextDto ConvertFullTextToDto(Text text)
