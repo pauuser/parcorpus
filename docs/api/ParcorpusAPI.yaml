@@ -1,0 +1,799 @@
+---
+openapi: 3.0.1
+info:
+  title: Parcorpus.API
+  version: v1
+paths:
+  "/api/v1/auth/register":
+    post:
+      tags:
+      - Auth
+      summary: Create new account
+      requestBody:
+        description: Registration information
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserRegistrationDto"
+      responses:
+        '200':
+          description: OK. Tokens returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokensDto"
+        '409':
+          description: Conflict. User already exists.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/auth/login":
+    post:
+      tags:
+      - Auth
+      summary: Login into account
+      requestBody:
+        description: Login information
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LoginDto"
+      responses:
+        '200':
+          description: OK. Tokens returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokensDto"
+        '401':
+          description: Unauthorized. Invalid password.
+        '404':
+          description: Not found. User with such email doesn't exist.
+        '500':
+          description: Server Error
+
+  "/api/v1/auth/refresh":
+    post:
+      tags:
+      - Auth
+      summary: Refresh token
+      requestBody:
+        description: Access token and refresh token
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TokensDto"
+      responses:
+        '200':
+          description: OK. Tokens returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokensDto"
+        '401':
+          description: Unauthorized. Token invalid or expired.
+        '500':
+          description: Internal server error.
+  
+  "/api/v1/jobs/{id}":
+    get:
+      tags:
+        - Jobs
+      summary: Get upload job status
+      parameters:
+      - name: id
+        in: path
+        description: Job Id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK. Job status returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JobDto"
+        '400':
+          description: Bad Request. Invalid input.
+        '401':
+          description: Unauthorized. 
+        '404':
+          description: Not Found.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/jobs":
+    get:
+      tags:
+        - Jobs
+      summary: Get user's upload jobs
+      responses:
+        '200':
+          description: OK. Job status returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/JobDto"
+        '400':
+          description: Bad Request. Invalid input.
+        '401':
+          description: Unauthorized. 
+        '404':
+          description: Not Found.
+        '500':
+          description: Internal server error.
+    
+    post:
+      tags:
+      - Jobs
+      summary: Upload text
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                source_language_code:
+                  type: string
+                  description: Source language short name
+                  example: ru
+                target_language_code:
+                  type: string
+                  description: Target language code
+                  example: en
+                title:
+                  type: string
+                  description: Text title
+                  example: War and Peace
+                author:
+                  type: string
+                  description: Text author
+                  example: L. N. Tolstoy
+                source:
+                  type: string
+                  description: Text source
+                  example: Russian State National Library
+                creation_year:
+                  type: integer
+                  description: Text creation year
+                  format: int32
+                  example: 1886
+                genres:
+                  type: array
+                  items:
+                    type: string
+                  description: Text genres list
+                source_text:
+                  type: string
+                  description: Source language text
+                  format: binary
+                target_text:
+                  type: string
+                  description: Target language text
+                  format: binary
+            encoding:
+              SourceLanguageCode:
+                style: form
+              TargetLanguageCode:
+                style: form
+              Title:
+                style: form
+              Author:
+                style: form
+              Source:
+                style: form
+              CreationYear:
+                style: form
+              Genres:
+                style: form
+              SourceText:
+                style: form
+              TargetText:
+                style: form
+      responses:
+        '200':
+          description: Ok. Upload job accepted.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JobDto"
+        '400':
+          description: Bad Request. Language or text is invalid.
+        '401':
+          description: Unauthorized. Such user id doesn't belong to any user.
+        '409':
+          description: Conflict. Text already exists.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/texts/concordance":
+    get:
+      tags:
+      - Texts
+      summary: Get word usage examples (word's concordance)
+      parameters:
+      - name: word
+        in: query
+        description: Word to search
+        required: true
+        schema:
+          type: string
+
+      - name: source_language_short_name
+        in: query
+        description: Searched word source language
+        required: true
+        schema:
+          type: string
+
+      - name: target_language_short_name
+        in: query
+        description: Translation will be given in respect to the chosen language
+        required: true
+        schema:
+          type: string
+
+      - name: genre
+        in: query
+        description: Genre filter (non-required)
+        schema:
+          type: string
+
+      - name: start_year
+        in: query
+        description: From year included (non-required but if stated - must come in pair with endDateTime)
+        schema:
+          type: string
+          format: date-time
+
+      - name: end_year
+        in: query
+        description: To date included (non-required but if stated - must come in pair with startDateTime)
+        schema:
+          type: string
+          format: date-time
+
+      - name: author
+        in: query
+        description: Author (non-required)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK. Concordance returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ConcordanceDto"
+        '400':
+          description: Bad Request. Invalid input.
+        '401':
+          description: Unauthorized. 
+        '404':
+          description: Not Found.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/texts":
+    get:
+      tags:
+      - Texts
+      summary: Get texts uploaded by the user
+      responses:
+        '200':
+          description: OK. Texts returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/TextDto"
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Not found. Information for the given user is not found.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/texts/{textId}":
+    get:
+      tags:
+      - Texts
+      summary: Get text by Id
+      parameters:
+      - name: textId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK. Texts returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FullTextDto"
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Not found. Information for the given user is not found.
+        '500':
+          description: Internal server error.
+
+    delete:
+      tags:
+      - Texts
+      summary: Delete text for the textId
+      parameters:
+      - name: textId
+        in: path
+        description: Text id of the text to be deleted
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK. Text deleted.
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Not found. Text with such id for the given user is not found.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/users/me":
+    post:
+      tags:
+      - User
+      summary: Get user information via token
+      responses:
+        '200':
+          description: OK. User returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserDto"
+        '401':
+          description: Unauthorized.
+        '500':
+          description: Internal server error.
+    
+    patch:
+      tags:
+        - User
+      summary: Update user with id from token
+      parameters:
+        - name: JsonPatch
+          in: body
+          required: true
+          schema:
+            $ref: "#/components/schemas/PatchRequest"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  "/api/v1/users/history":
+    get:
+      tags:
+      - User
+      summary: Get user's search history
+      responses:
+        '200':
+          description: OK. Search history returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/SearchHistoryRecord"
+        '401':
+          description: Unauthorized.
+        '404':
+          description: Not found. Search history is empty.
+        '500':
+          description: Internal server error.
+
+  "/api/v1/users/{userId}":
+    get:
+      tags:
+      - User
+      summary: Get user by Id
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK. Tokens returned.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserDto"
+        '401':
+          description: Unauthorized.
+        '404':
+          description: User not found.
+        '500':
+          description: Internal server error.
+
+components:
+  schemas:
+    ConcordanceDto:
+      type: object
+      properties:
+        source_word:
+          type: string
+          description: Source word
+          nullable: true
+          example: яблоко
+        aligned_word:
+          type: string
+          description: Aligned word
+          nullable: true
+          example: apple
+        source_text:
+          type: string
+          description: Source text
+          nullable: true
+          example: Я увидел яблоко
+        aligned_translation:
+          type: string
+          description: Aligned translation
+          nullable: true
+          example: I saw an apple
+        title:
+          type: string
+          description: Source text title
+          nullable: true
+          example: War and peace
+        author:
+          type: string
+          description: Author of the text
+          nullable: true
+          example: L. N. Tolstoy
+        source:
+          type: string
+          description: Source of the text
+          nullable: true
+          example: Russian State National Library
+        creation_year:
+          type: integer
+          description: Year of the book creation
+          format: int32
+          nullable: true
+          example: 1886
+        add_date:
+          type: string
+          description: When the text was added to the database
+          format: date-time
+          example: 19.03.2023
+      additionalProperties: false
+      description: Search result (concordance) DTO model
+
+    FilterDto:
+      type: object
+      properties:
+        genre:
+          type: string
+          nullable: true
+        start_year:
+          type: string
+          format: date-time
+          nullable: true
+        end_year:
+          type: string
+          format: date-time
+          nullable: true
+        author:
+          type: string
+          nullable: true
+      additionalProperties: false
+
+    FullTextDto:
+      type: object
+      properties:
+        text:
+          "$ref": "#/components/schemas/TextDto"
+        sentences:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SentenceDto"
+          description: Sentences
+          nullable: true
+      additionalProperties: false
+      description: Text model containing sentences
+
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email
+          nullable: true
+          example: inbox@mail.ru
+        password:
+          type: string
+          description: Password
+          nullable: true
+          example: LuckyHamster25
+      additionalProperties: false
+      description: Login DTO
+
+    SearchHistoryRecord:
+      type: object
+      properties:
+        search_history_id:
+          type: integer
+          format: int32
+        userId:
+          type: string
+          format: uuid
+        word:
+          type: string
+          nullable: true
+        source_language_short_name:
+          type: string
+          nullable: true
+        destination_language_short_name:
+          type: string
+          nullable: true
+        filters:
+          "$ref": "#/components/schemas/FilterDto"
+        query_timestamp_utc:
+          type: string
+          format: date-time
+      additionalProperties: false
+    
+    SentenceDto:
+      type: object
+      properties:
+        sentence_id:
+          type: integer
+          description: Sentence id
+          format: int32
+          nullable: true
+          example: 1
+        source_text:
+          type: string
+          description: New sentence source text
+          nullable: true
+          example: I saw an apple
+        aligned_translation:
+          type: string
+          description: New sentence aligned translation
+          nullable: true
+          example: Я увидел яблоко
+        words:
+          type: array
+          items:
+            "$ref": "#/components/schemas/WordPairDto"
+          description: Aligned words in sentence
+          nullable: true
+      additionalProperties: false
+      description: Dto to edit sentence
+    
+    TextDto:
+      type: object
+      properties:
+        text_id:
+          type: integer
+          description: Text id
+          format: int32
+          nullable: true
+        title:
+          type: string
+          description: Text title
+          nullable: true
+        author:
+          type: string
+          description: Text author
+          nullable: true
+        source:
+          type: string
+          description: Text source
+          nullable: true
+        creation_year:
+          type: integer
+          description: Creation year
+          format: int32
+          nullable: true
+        add_date:
+          type: string
+          description: Add date
+          format: date-time
+          nullable: true
+        source_language:
+          type: string
+          description: Source language short name
+          nullable: true
+        target_language:
+          type: string
+          description: Target language short name
+          nullable: true
+        added_by:
+          type: string
+          description: User Id of the user who uploaded the text
+          format: uuid
+      additionalProperties: false
+      description: Model for returning text information
+    
+    TokensDto:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Access token
+          nullable: true
+          example: 12j5p953gym42592h3u32y21100003
+        refresh_token:
+          type: string
+          description: Refresh token
+          nullable: true
+          example: 185930@4842004T422KK5330023456
+      additionalProperties: false
+      description: Token pair DTO
+    
+    UserDto:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: Id (GUID)
+          format: uuid
+          nullable: true
+          example: 42594DCD-913F-473F-BDD3-DBFDDC075C8B
+        name:
+          type: string
+          description: User's name
+          nullable: true
+          example: Pavel
+        surname:
+          type: string
+          description: User's surname
+          nullable: true
+          example: Ivanov
+        email:
+          type: string
+          description: User's email
+          nullable: true
+          example: inbox@mail.ru
+        country_name:
+          type: string
+          description: User's country name
+          nullable: true
+          example: Russian Federation
+        native_language_short_name:
+          type: string
+          description: Language code
+          nullable: true
+          example: ru
+      additionalProperties: false
+      description: User DTO model
+    
+    UserRegistrationDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User's name
+          nullable: true
+          example: Pavel
+        surname:
+          type: string
+          description: User's surname
+          nullable: true
+          example: Ivanov
+        email:
+          type: string
+          description: User's email
+          nullable: true
+          example: pauuser.work@gmail.com
+        country_name:
+          type: string
+          description: User's country name
+          nullable: true
+          example: Russian Federation
+        language_short_name:
+          type: string
+          description: User's language short name
+          nullable: true
+          example: ru
+        password:
+          type: string
+          description: User's password
+          nullable: true
+          example: LuckyHamster24
+      additionalProperties: false
+      description: Model for user registration
+    
+    WordPairDto:
+      type: object
+      properties:
+        source_word:
+          type: string
+          description: Source word
+          nullable: true
+          example: Je
+        target_word:
+          type: string
+          description: Aligned translation
+          nullable: true
+          example: I
+      additionalProperties: false
+      description: Word pair DTO
+    
+    JobDto:
+      type: object
+      properties:
+        job_id:
+          type: string 
+          format: uuid
+        status:
+          type: string
+          enum: [uploaded, aligning, saving, finished, failed]
+    
+    PatchRequest:
+      description: Path request body representation
+      type: array
+      items:
+        $ref: "#/components/schemas/PatchDocument"
+
+    PatchDocument: 
+      description: A JSONPatch document as defined by RFC 6902 
+      required:
+      - "op"
+      - "path"
+      properties: 
+        op: 
+          type: string 
+          description: The operation to be performed 
+          enum:
+          - "add"
+          - "remove"
+          - "replace"
+          - "move"
+          - "copy"
+          - "test"
+          example: "replace"
+        path: 
+          type: string 
+          description: A JSON-Pointer 
+          example: "name"
+        value: 
+          type: object 
+          description: The value to be used within the operations.
+          example: "Alex"
+        from: 
+          type: string 
+          description: A string containing a JSON Pointer value.
+  
+  securitySchemes:
+    Bearer:
+      type: http
+      description: Specify the authorization token
+      scheme: Bearer
+      bearerFormat: JWT
+
+security:
+- Bearer: []

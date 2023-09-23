@@ -120,7 +120,7 @@ public class AuthController : ControllerBase
     /// <response code="500">Internal server error.</response>
     [HttpPost("refresh")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokensDto))]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Refresh([FromBody] TokensDto tokens)
     {
