@@ -4,9 +4,9 @@ namespace Parcorpus.Core.Interfaces;
 
 public interface ILanguageRepository
 {
-    Task<List<Concordance>> GetConcordance(Word word, Language desiredLanguage, Filter filter);
+    Task<Paged<Concordance>> GetConcordance(Word word, Language desiredLanguage, Filter filter, PaginationParameters paging);
     
-    Task<List<Text>> GetTextsAddedByUser(Guid userId);
+    Task<Paged<Text>> GetTextsAddedByUser(Guid userId, PaginationParameters paging);
 
     Task AddAlignedText(Guid userId, Text alignedText);
     
@@ -14,5 +14,5 @@ public interface ILanguageRepository
 
     Task<bool> TextExists(MetaAnnotation metaAnnotation, Language sourceLanguage, Language targetLanguage);
 
-    Task<Text> GetTextById(int textId);
+    Task<Text> GetTextById(int textId, PaginationParameters paging);
 }

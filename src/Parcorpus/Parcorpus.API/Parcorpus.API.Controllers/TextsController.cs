@@ -38,11 +38,13 @@ public class TextsController : ControllerBase
         _languageService = languageService ?? throw new ArgumentNullException(nameof(languageService));
         _languagesConfiguration = languagesConfiguration.Value ?? throw new ArgumentNullException(nameof(languagesConfiguration));
     }
-    
+
     /// <summary>
     /// Get word usage examples (word's concordance)
     /// </summary>
     /// <param name="query">Filters for the search</param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
     /// <returns>List of word usage examples</returns>
     /// <response code="200">OK. Concordance returned.</response>
     /// <response code="400">Bad Request. Invalid input.</response>
@@ -56,7 +58,9 @@ public class TextsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetConcordance([FromQuery]ConcordanceQueryDto query)
+    public async Task<IActionResult> GetConcordance([FromQuery]ConcordanceQueryDto query, 
+        [FromQuery] int? page = null, 
+        [FromQuery(Name = "page_size")] int? pageSize = null)
     {
         try
         {
@@ -71,12 +75,14 @@ public class TextsController : ControllerBase
                     $"target = {query.TargetLanguageShortName}");
             }
 
-            var result = await _languageService.GetConcordance(userId, new ConcordanceQuery(
-                sourceWord: new Word(query.Word, new Language(query.SourceLanguageShortName,
-                    _languagesConfiguration.LanguagesForms[query.SourceLanguageShortName])),
-                destinationLanguage: new Language(query.TargetLanguageShortName,
-                    _languagesConfiguration.LanguagesForms[query.TargetLanguageShortName]),
-                filters: FilterConverter.ConvertDtoToAppModel(query.Filter)));
+            var result = await _languageService.GetConcordance(userId: userId, 
+                query: new ConcordanceQuery(
+                    sourceWord: new Word(query.Word, new Language(query.SourceLanguageShortName,
+                        _languagesConfiguration.LanguagesForms[query.SourceLanguageShortName])),
+                    destinationLanguage: new Language(query.TargetLanguageShortName,
+                        _languagesConfiguration.LanguagesForms[query.TargetLanguageShortName]),
+                    filters: FilterConverter.ConvertDtoToAppModel(query.Filter)),
+                paging: new PaginationParameters(page, pageSize));
 
             return Ok(result.Select(ConcordanceConverter.ConvertAppModelToDto));
         }
@@ -116,12 +122,14 @@ public class TextsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetUserTexts()
+    public async Task<IActionResult> GetUserTexts([FromQuery] int? page = null, 
+        [FromQuery(Name = "page_size")] int? pageSize = null)
     {
         try
         {
             var userId = HttpContext.Request.GetUserId();
-            var result = await _languageService.GetTextsAddedByUser(userId);
+            var result = await _languageService.GetTextsAddedByUser(userId: userId,
+                paging: new PaginationParameters(page, pageSize));
             
             return Ok(result.Select(TextConverter.ConvertAppModelToDto));
         }
@@ -156,11 +164,14 @@ public class TextsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetTextById([FromRoute] int textId) 
+    public async Task<IActionResult> GetTextById([FromRoute] int textId,
+        [FromQuery] int? page = null, 
+        [FromQuery(Name = "page_size")] int? pageSize = null) 
     {
         try
         {
-            var result = await _languageService.GetTextById(textId);
+            var result = await _languageService.GetTextById(textId: textId,
+                paging: new PaginationParameters(page, pageSize));
             
             return Ok(TextConverter.ConvertFullTextToDto(result));
         }

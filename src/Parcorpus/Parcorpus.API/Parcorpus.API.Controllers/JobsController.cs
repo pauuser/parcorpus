@@ -126,12 +126,14 @@ public class JobsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> LatestJobs()
+    public async Task<IActionResult> LatestJobs([FromQuery] int? page = null, 
+        [FromQuery(Name = "page_size")] int? pageSize = null)
     {
         try
         {
             var userId = HttpContext.Request.GetUserId();
-            var jobs = await _jobService.GetUserJobs(userId);
+            var jobs = await _jobService.GetUserJobs(userId: userId,
+                paging: new PaginationParameters(page, pageSize));
             
             return Ok(jobs.Select(JobConverter.ConvertAppModelToDto));
         }

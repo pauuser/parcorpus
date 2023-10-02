@@ -6,5 +6,5 @@ public interface ISearchHistoryRepository
 {
     Task AddRecord(Guid userId, ConcordanceQuery query);
 
-    Task<List<SearchHistoryRecord>> GetSearchHistory(Guid userId);
+    Task<Paged<SearchHistoryRecord>> GetSearchHistory(Guid userId, PaginationParameters paging);
 }

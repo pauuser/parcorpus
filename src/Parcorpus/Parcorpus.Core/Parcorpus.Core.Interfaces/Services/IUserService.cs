@@ -6,5 +6,5 @@ public interface IUserService
 {
     Task<User> GetUserById(Guid userId);
 
-    Task<List<SearchHistoryRecord>> GetUserSearchHistory(Guid userId);
+    Task<Paged<SearchHistoryRecord>> GetUserSearchHistory(Guid userId, PaginationParameters paging);
 }

@@ -30,13 +30,13 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         _cacheConfiguration = cacheConfiguration.Value ?? throw new ArgumentNullException(nameof(cacheConfiguration));
     }
 
-    public async Task<List<Concordance>> GetConcordance(Word word, Language desiredLanguage, Filter filter)
+    public async Task<Paged<Concordance>> GetConcordance(Word word, Language desiredLanguage, Filter filter, PaginationParameters paging)
     {
         try
         {
-            var cacheKey = GetConcordanceCacheKey(word, desiredLanguage, filter);
+            var cacheKey = GetConcordanceCacheKey(word, desiredLanguage, filter, paging);
             if (_cache.TryGetValue(cacheKey, out var cachedValue))
-                return (List<Concordance>) cachedValue!;
+                return (Paged<Concordance>) cachedValue!;
             
             var concordance = _context.Words
                 .Where(w => w.SourceWord == word.WordForm)
@@ -59,12 +59,22 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                     .ThenInclude(s => s.TextNavigation)
                         .ThenInclude(t => t.AddedByNavigation);
 
-            var filtered = await concordance.ApplyFilters(filter).ToListAsync();
-            var result = filtered.Select(ConcordanceConverter.ConvertWordToConcordance).ToList();
+            var filtered = concordance.ApplyFilters(filter);
+            var totalCount = await filtered.CountAsync();
+            if (paging.Specified)
+                filtered = filtered
+                    .Skip((paging.PageNumber.Value - 1) * paging.PageSize.Value)
+                    .Take(paging.PageSize.Value);
+            
+            var data = await filtered.ToListAsync();
+            var result = data.Select(ConcordanceConverter.ConvertWordToConcordance).ToList();
 
             _cache.Set(cacheKey, result, absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(_cacheConfiguration.ConcordanceExpirationMinutes));
 
-            return result;
+            return new Paged<Concordance>(pageNumber: paging.PageNumber,
+                pageSize: paging.PageSize,
+                totalCount: totalCount,
+                items: result);
         }
         catch (Exception ex)
         {
@@ -73,24 +83,24 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         }
     }
 
-    private string GetConcordanceCacheKey(Word word, Language desiredLanguage, Filter filter)
+    private string GetConcordanceCacheKey(Word word, Language desiredLanguage, Filter filter, PaginationParameters paging)
     {
         var sb = new StringBuilder();
 
         sb.AppendJoin("_", word.WordForm, word.Language.ShortName, desiredLanguage.ShortName,
-            filter.Author, filter.StartDateTime, filter.EndDateTime, filter.Genre);
+            filter.Author, filter.StartDateTime, filter.EndDateTime, filter.Genre, paging.PageNumber, paging.PageSize);
 
         return sb.ToString();
     }
 
-    public async Task<Text> GetTextById(int textId)
+    public async Task<Text> GetTextById(int textId, PaginationParameters paging)
     {
         try
         {
             if (_cache.TryGetValue(textId, out var cachedValue))
                 return (Text) cachedValue!;
             
-            var text = await _context.Texts
+            var text = _context.Texts
                 .Where(t => t.TextId == textId)
                 .Include(t => t.MetaAnnotationNavigation)
                     .ThenInclude(m => m.MetaGenresNavigation)
@@ -99,10 +109,12 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                     .ThenInclude(lp => lp.FromLanguageNavigation)
                 .Include(lp => lp.LanguagePairNavigation)
                     .ThenInclude(lp => lp.ToLanguageNavigation)
-                .Include(t => t.AddedByNavigation)
-                .Include(t => t.SentencesNavigation)
-                    .ThenInclude(s => s.WordsNavigation)
-                .FirstOrDefaultAsync();
+                .Include(t => t.AddedByNavigation);
+            if (paging.Specified)
+                text.Include(t => t.SentencesNavigation)
+                    .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+               .Take(validFilter.PageSize)
+                    .ThenInclude(s => s.WordsNavigation);
 
             if (text is null)
             {
@@ -128,14 +140,14 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         }
     }
 
-    public async Task<List<Text>> GetTextsAddedByUser(Guid userId)
+    public async Task<Paged<Text>> GetTextsAddedByUser(Guid userId, PaginationParameters paging)
     {
         try
         {
             if (_cache.TryGetValue(userId, out var cachedValue))
-                return (List<Text>) cachedValue!;
+                return (Paged<Text>) cachedValue!;
             
-            var texts = await _context.Texts
+            var texts = _context.Texts
                 .Include(t => t.AddedByNavigation)
                 .Where(t => t.AddedByNavigation!.UserId == userId)
                 .Include(t => t.MetaAnnotationNavigation)
@@ -144,17 +156,25 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                 .Include(t => t.LanguagePairNavigation)
                     .ThenInclude(lp => lp.FromLanguageNavigation)
                 .Include(lp => lp.LanguagePairNavigation)
-                    .ThenInclude(lp => lp.ToLanguageNavigation)
-                .Include(t => t.SentencesNavigation)
-                    .ThenInclude(s => s.WordsNavigation)
-                .ToListAsync();
-            
-            Logger.LogInformation("Successfully retrieved {count} texts for userId = {userId}", texts.Count, userId);
+                    .ThenInclude(lp => lp.ToLanguageNavigation);
+            var totalCount = await texts.CountAsync();
 
-            var result = texts.Select(TextConverter.ConvertDbModelToAppModel).ToList();
+            var paged = texts.Where(_ => true);
+            if (paging.Specified)
+                paged = paged
+                    .Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
+                    .Take(paging.PageSize.Value);
+            
+            var pagedList = await paged.ToListAsync();
+            Logger.LogInformation("Successfully retrieved {count} texts for userId = {userId}", pagedList.Count, userId);
+
+            var result = pagedList.Select(TextConverter.ConvertDbModelToAppModel).ToList();
             _cache.Set(userId, result);
             
-            return result;
+            return new Paged<Text>(pageNumber: paging.PageNumber,
+                pageSize: paging.PageSize,
+                totalCount: totalCount,
+                items: result);
         }
         catch (Exception ex)
         {

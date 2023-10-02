@@ -16,10 +16,10 @@ public static class TextConverter
             sourceLanguage: LanguageConverter.ConvertDbModelToAppModel(text.LanguagePairNavigation.FromLanguageNavigation),
             targetLanguage: LanguageConverter.ConvertDbModelToAppModel(text.LanguagePairNavigation.ToLanguageNavigation),
             genres: text.MetaAnnotationNavigation.MetaGenresNavigation.Select(mg => mg.GenreNavigation?.Name).ToList(),
-            sentences: text.SentencesNavigation.Select(s => SentenceConverter
+            sentences: text.SentencesNavigation?.Select(s => SentenceConverter
                 .ConvertDbModelToAppModel(sentence: s, 
                     sourceLanguage: text.LanguagePairNavigation.FromLanguageNavigation, 
-                    targetLanguage: text.LanguagePairNavigation.ToLanguageNavigation)).ToList(),
+                    targetLanguage: text.LanguagePairNavigation.ToLanguageNavigation)).ToList() ?? new List<Sentence>(),
             addedBy: text.AddedBy);
     }
 }

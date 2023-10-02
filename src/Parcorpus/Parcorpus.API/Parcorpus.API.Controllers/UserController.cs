@@ -74,12 +74,14 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> History()
+    public async Task<IActionResult> History([FromQuery] int? page = null, 
+        [FromQuery(Name = "page_size")] int? pageSize = null)
     {
         try
         {
             var userId = HttpContext.Request.GetUserId();
-            var history = await _userService.GetUserSearchHistory(userId);
+            var history = await _userService.GetUserSearchHistory(userId: userId,
+                paging: new PaginationParameters(page, pageSize));
             
             return Ok(history.Select(SearchHistoryConverter.ConvertAppModelToDto));
         }

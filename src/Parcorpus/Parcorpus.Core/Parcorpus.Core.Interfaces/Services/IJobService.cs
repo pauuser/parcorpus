@@ -6,7 +6,7 @@ public interface IJobService
 {
     Task<ProgressJob> UploadText(Guid userId, BiText text);
 
-    Task<List<ProgressJob>> GetUserJobs(Guid userId);
+    Task<Paged<ProgressJob>> GetUserJobs(Guid userId, PaginationParameters paging);
 
     Task<ProgressJob> GetJobById(Guid jobId);
 }

@@ -11,5 +11,5 @@ public interface IJobRepository
 
     Task<ProgressJob> UpdateStatus(Guid jobId, JobStatus newStatus);
 
-    Task<List<ProgressJob>> GetUserJobs(Guid userId);
+    Task<Paged<ProgressJob>> GetUserJobs(Guid userId, PaginationParameters paging);
 }

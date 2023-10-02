@@ -12,11 +12,8 @@ public class LanguageService : ILanguageService
     private readonly ISearchHistoryRepository _searchHistoryRepository;
     private readonly ILogger<LanguageService> _logger;
 
-    public LanguageService(ILanguageRepository languageRepository, 
-        IAnnotationService annotationService, 
+    public LanguageService(ILanguageRepository languageRepository,
         ISearchHistoryRepository searchHistoryRepository,
-        IQueueProducerService queueProducerService,
-        IJobRepository jobRepository,
         ILogger<LanguageService> logger)
     {
         _languageRepository = languageRepository ?? throw new ArgumentNullException(nameof(languageRepository));
@@ -25,7 +22,7 @@ public class LanguageService : ILanguageService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
-    public async Task<List<Concordance>> GetConcordance(Guid userId, ConcordanceQuery query)
+    public async Task<Paged<Concordance>> GetConcordance(Guid userId, ConcordanceQuery query, PaginationParameters paging)
     {
         var word = query.SourceWord;
         var desiredLanguage = query.DestinationLanguage;
@@ -33,8 +30,8 @@ public class LanguageService : ILanguageService
         
         await _searchHistoryRepository.AddRecord(userId, query);
         
-        var concordance = await _languageRepository.GetConcordance(word, desiredLanguage, filter);
-        if (!concordance.Any())
+        var concordance = await _languageRepository.GetConcordance(word, desiredLanguage, filter, paging);
+        if (!concordance.Items.Any())
         {
             _logger.LogError("Nothing was found for word \"{word}\" ({srcLang} -> {trgLang}) and filter {filter}", 
                 word.WordForm, word.Language.ShortName, desiredLanguage.ShortName, filter.ToString());
@@ -49,11 +46,11 @@ public class LanguageService : ILanguageService
         await _languageRepository.DeleteTextById(userId, textId);
     }
     
-    public async Task<List<Text>> GetTextsAddedByUser(Guid userId)
+    public async Task<Paged<Text>> GetTextsAddedByUser(Guid userId, PaginationParameters paging)
     {
-        var texts = await _languageRepository.GetTextsAddedByUser(userId);
+        var texts = await _languageRepository.GetTextsAddedByUser(userId, paging);
 
-        if (!texts.Any())
+        if (!texts.Items.Any())
         {
             _logger.LogError("Texts for user {userId} don't exist", userId);
             throw new NotFoundException($"Texts for user {userId} don't exist");
@@ -62,9 +59,9 @@ public class LanguageService : ILanguageService
         return texts;
     }
 
-    public async Task<Text> GetTextById(int textId)
+    public async Task<Text> GetTextById(int textId, PaginationParameters paging)
     {
-        var text = await _languageRepository.GetTextById(textId);
+        var text = await _languageRepository.GetTextById(textId, paging);
         
         return text;
     }

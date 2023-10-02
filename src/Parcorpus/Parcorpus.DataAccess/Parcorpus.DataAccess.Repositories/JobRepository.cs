@@ -94,19 +94,30 @@ public class JobRepository : IJobRepository
         }
     }
 
-    public async Task<List<ProgressJob>> GetUserJobs(Guid userId)
+    public async Task<Paged<ProgressJob>> GetUserJobs(Guid userId, PaginationParameters paging)
     {
         try
         {
-            var jobs = await _context.Jobs.Where(j => j.UserId == userId).ToListAsync();
-            if (jobs is null)
+            var jobs = _context.Jobs.Where(j => j.UserId == userId);
+            var totalCount = await jobs.CountAsync();
+            
+            if (paging.Specified)
+                jobs = jobs.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
+                    .Take(paging.PageSize.Value);
+
+            var result = await jobs.ToListAsync();
+            
+            if (result is null)
             {
                 _logger.LogError("Jobs of user id {userId} do not exist", userId);
                 throw new JobNotFoundException($"Jobs with user id {userId} do not exist");
             }
-            _logger.LogInformation("Successfully retrieved jobs of userId {userId}, count: {count}", userId, jobs.Count);
-
-            return jobs.Select(JobConverter.ConvertDbModelToAppModel).ToList();
+            _logger.LogInformation("Successfully retrieved jobs of userId {userId}, count: {count}", userId, result.Count);
+            
+            return new Paged<ProgressJob>(pageNumber: paging.PageNumber,
+                pageSize: paging.PageSize,
+                totalCount: totalCount,
+                items: result.Select(JobConverter.ConvertDbModelToAppModel).ToList());
         }
         catch (JobNotFoundException)
         {

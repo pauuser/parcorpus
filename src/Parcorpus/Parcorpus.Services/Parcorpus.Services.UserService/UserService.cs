@@ -25,11 +25,11 @@ public class UserService : IUserService
         return await _userRepository.GetUserById(userId);
     }
 
-    public async Task<List<SearchHistoryRecord>> GetUserSearchHistory(Guid userId)
+    public async Task<Paged<SearchHistoryRecord>> GetUserSearchHistory(Guid userId, PaginationParameters paging)
     {
         _logger.LogInformation("Getting search history for user = {userId}", userId);
-        var history = await _searchHistoryRepository.GetSearchHistory(userId);
-        if (!history.Any())
+        var history = await _searchHistoryRepository.GetSearchHistory(userId, paging);
+        if (!history.Items.Any())
         {
             _logger.LogError("User {userId} has empty search history", userId);
             throw new NotFoundException($"User {userId} has empty search history");

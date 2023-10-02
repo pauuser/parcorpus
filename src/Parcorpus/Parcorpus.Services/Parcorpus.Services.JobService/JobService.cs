@@ -35,9 +35,9 @@ public class JobService : IJobService
         return job;
     }
 
-    public Task<List<ProgressJob>> GetUserJobs(Guid userId)
+    public Task<Paged<ProgressJob>> GetUserJobs(Guid userId, PaginationParameters paging)
     {
-        return _jobRepository.GetUserJobs(userId);
+        return _jobRepository.GetUserJobs(userId, paging);
     }
 
     public Task<ProgressJob> GetJobById(Guid jobId)

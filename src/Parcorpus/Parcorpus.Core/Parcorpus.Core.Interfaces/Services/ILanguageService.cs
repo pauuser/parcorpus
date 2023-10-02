@@ -4,11 +4,11 @@ namespace Parcorpus.Core.Interfaces;
 
 public interface ILanguageService
 {
-    Task<List<Concordance>> GetConcordance(Guid userId, ConcordanceQuery query);
+    Task<Paged<Concordance>> GetConcordance(Guid userId, ConcordanceQuery query, PaginationParameters paging);
 
     Task DeleteText(Guid userId, int textId);
 
-    Task<List<Text>> GetTextsAddedByUser(Guid userId);
+    Task<Paged<Text>> GetTextsAddedByUser(Guid userId, PaginationParameters paging);
 
-    Task<Text> GetTextById(int textId);
+    Task<Text> GetTextById(int textId, PaginationParameters paging);
 }

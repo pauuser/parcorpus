@@ -50,13 +50,24 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
         }
     }
 
-    public async Task<List<SearchHistoryRecord>> GetSearchHistory(Guid userId)
+    public async Task<Paged<SearchHistoryRecord>> GetSearchHistory(Guid userId, PaginationParameters paging)
     {
         try
         {
-            var history = await _context.SearchHistory.Where(sh => sh.UserId == userId).ToListAsync();
-
-            return history.Select(SearchHistoryConverter.ConvertDbModelToAppModel).ToList();
+            var history = _context.SearchHistory
+                .Where(sh => sh.UserId == userId);
+            var totalCount = await history.CountAsync();
+            
+            if (paging.Specified)
+                history = history.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
+                    .Take(paging.PageSize.Value);
+            
+            var result = await history.ToListAsync();
+            
+            return new Paged<SearchHistoryRecord>(pageNumber: paging.PageNumber,
+                pageSize: paging.PageSize,
+                totalCount: totalCount,
+                items: result.Select(SearchHistoryConverter.ConvertDbModelToAppModel).ToList());
         }
         catch (Exception ex)
         {
