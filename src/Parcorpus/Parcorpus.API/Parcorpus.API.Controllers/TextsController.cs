@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,6 @@ using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Exceptions;
 using Parcorpus.Core.Interfaces;
 using Parcorpus.Core.Models;
-using Parcorpus.Services.Helpers;
 
 namespace Parcorpus.API.Controllers;
 
@@ -19,10 +17,10 @@ namespace Parcorpus.API.Controllers;
 /// Controller for managing corpus actions
 /// </summary>
 [ApiController]
-[Route("api/v1/corpus")]
-public class CorpusController : ControllerBase
+[Route("api/v1/texts")]
+public class TextsController : ControllerBase
 {
-    private readonly ILogger<CorpusController> _logger;
+    private readonly ILogger<TextsController> _logger;
     private readonly ILanguageService _languageService;
     private readonly LanguagesConfiguration _languagesConfiguration;
 
@@ -32,85 +30,13 @@ public class CorpusController : ControllerBase
     /// <param name="logger">Logger</param>
     /// <param name="languageService">Language service</param>
     /// <param name="languagesConfiguration">Language names dictionary</param>
-    public CorpusController(ILogger<CorpusController> logger, 
+    public TextsController(ILogger<TextsController> logger, 
         ILanguageService languageService, 
         IOptions<LanguagesConfiguration> languagesConfiguration)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _languageService = languageService ?? throw new ArgumentNullException(nameof(languageService));
         _languagesConfiguration = languagesConfiguration.Value ?? throw new ArgumentNullException(nameof(languagesConfiguration));
-    }
-
-    /// <summary>
-    /// Upload text
-    /// </summary>
-    /// <param name="textInfo">Text information</param>
-    /// <returns>Nothing</returns>
-    /// <response code="201">Created. Text was added.</response>
-    /// <response code="400">Bad Request. Language or text is invalid.</response>
-    /// <response code="401">Unauthorized. Such user id doesn't belong to any user.</response>
-    /// <response code="409">Conflict. Text already exists.</response>
-    /// <response code="500">Internal server error.</response>
-    [Authorize]
-    [HttpPost("upload")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UploadText([FromForm] InputTextDto textInfo)
-    {
-        try
-        {
-            var userId = HttpContext.Request.GetUserId();
-            if (!_languagesConfiguration.LanguagesForms.ContainsKey(textInfo.SourceLanguageCode) ||
-                !_languagesConfiguration.LanguagesForms.ContainsKey(textInfo.TargetLanguageCode))
-            {
-                _logger.LogError("One of the languages is null: source = {source}, target = {target}",
-                    textInfo.SourceLanguageCode, textInfo.TargetLanguageCode);
-                throw new ArgumentException($"One of the languages is null: source = {textInfo.SourceLanguageCode}, " +
-                    $"target = {textInfo.TargetLanguageCode}");
-            }
-
-            var sourceText = FormStringReader.ReadFormFileToString(textInfo.SourceText);
-            var targetText = FormStringReader.ReadFormFileToString(textInfo.TargetText);
-
-            await _languageService.UploadText(userId,
-                new BiText(sourceText: sourceText,
-                    targetText: targetText,
-                    sourceLanguage: new Language(shortName: textInfo.SourceLanguageCode,
-                        fullEnglishName: _languagesConfiguration.LanguagesForms[textInfo.SourceLanguageCode]),
-                    targetLanguage: new Language(shortName: textInfo.TargetLanguageCode,
-                        fullEnglishName: _languagesConfiguration.LanguagesForms[textInfo.TargetLanguageCode]),
-                    new MetaAnnotation(textInfo.Title,
-                        textInfo.Author,
-                        textInfo.Source,
-                        textInfo.CreationYear,
-                        DateTime.UtcNow),
-                    textInfo.Genres.ToList()));
-
-            return StatusCode(StatusCodes.Status201Created);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogError(ex, "Bad Request: {message}", ex.Message);
-            return BadRequest($"Bad Request: {ex.Message}");
-        }
-        catch (NoTokenException ex)
-        {
-            _logger.LogError(ex, "Unauthorized: {message}", ex.Message);
-            return Unauthorized($"Unauthorized: {ex.Message}");
-        }
-        catch (TextAlreadyExistsException ex)
-        {
-            _logger.LogError(ex, "Conflict: {message}", ex.Message);
-            return Conflict($"Conflict: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Internal server error: {message}", ex.Message);
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-        }
     }
     
     /// <summary>

@@ -11,7 +11,10 @@ using Parcorpus.Core.Interfaces;
 using Parcorpus.DataAccess.Repositories;
 using Parcorpus.Services.AnnotationService;
 using Parcorpus.Services.AuthService;
+using Parcorpus.Services.JobService;
 using Parcorpus.Services.LanguageService;
+using Parcorpus.Services.QueueConsumerService;
+using Parcorpus.Services.QueueProducerService;
 using Parcorpus.Services.UserService;
 
 namespace Parcorpus.API.Extensions;
@@ -24,6 +27,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddTransient<IUserRepository, UserRepository>();
         serviceCollection.AddTransient<ICredentialsRepository, CredentialsRepository>();
         serviceCollection.AddTransient<ISearchHistoryRepository, SearchHistoryRepository>();
+        serviceCollection.AddTransient<IJobRepository, JobRepository>();
 
         return serviceCollection;
     }
@@ -38,12 +42,17 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(WordAlignerConfiguration.ConfigurationSectionName);
         serviceCollection.AddOptions<TokenConfiguration>()
             .BindConfiguration(TokenConfiguration.ConfigurationSectionName);
+        serviceCollection.AddOptions<QueueConfiguration>()
+            .BindConfiguration(QueueConfiguration.ConfigurationSectionName);
         
         serviceCollection.AddTransient<IUserService, UserService>();
         serviceCollection.AddTransient<IAnnotationService, AnnotationService>();
         serviceCollection.AddTransient<ILanguageService, LanguageService>();
         serviceCollection.AddTransient<IAuthService, AuthService>();
         serviceCollection.AddSingleton<IWordAligner, Parcorpus.Services.AnnotationService.WordAlignerClient.WordAligner>();
+        serviceCollection.AddSingleton<IQueueProducerService, QueueProducerService>();
+        serviceCollection.AddTransient<IJobService, JobService>();
+        serviceCollection.AddHostedService<QueueConsumerService>();
         
         return serviceCollection;
     }

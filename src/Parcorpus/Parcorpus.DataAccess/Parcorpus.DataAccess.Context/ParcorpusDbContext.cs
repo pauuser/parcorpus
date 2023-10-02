@@ -29,6 +29,8 @@ public partial class ParcorpusDbContext : DbContext
 
     public DbSet<SearchHistoryDbModel> SearchHistory { get; set; }
 
+    public DbSet<JobDbModel> Jobs { get; set; }
+
     public ParcorpusDbContext(DbContextOptions<ParcorpusDbContext> options) : base(options)
     {
     }
@@ -189,6 +191,15 @@ public partial class ParcorpusDbContext : DbContext
             entity.HasOne(s => s.UserNavigation)
                 .WithMany(u => u.SearchHistoryNavigation)
                 .HasForeignKey(s => s.UserId);
+        });
+
+        modelBuilder.Entity<JobDbModel>(entity =>
+        {
+            entity.HasKey(j => j.JobId);
+
+            entity.HasOne(j => j.UserNavigation)
+                .WithMany(u => u.JobNavigation)
+                .HasForeignKey(j => j.UserId);
         });
     }
 }

@@ -23,7 +23,10 @@
       <ProjectReference Include="..\..\Parcorpus.DataAccess\Parcorpus.DataAccess.Repositories\Parcorpus.DataAccess.Repositories.csproj" />
       <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.AnnotationService\Parcorpus.Services.AnnotationService.csproj" />
       <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.AuthService\Parcorpus.Services.AuthService.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.JobService\Parcorpus.Services.JobService.csproj" />
       <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.LanguageService\Parcorpus.Services.LanguageService.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.QueueConsumerService\Parcorpus.Services.QueueConsumerService.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.QueueProducerService\Parcorpus.Services.QueueProducerService.csproj" />
       <ProjectReference Include="..\..\Parcorpus.Services\Parcorpus.Services.UserService\Parcorpus.Services.UserService.csproj" />
       <ProjectReference Include="..\Parcorpus.API.Controllers\Parcorpus.API.Controllers.csproj" />
     </ItemGroup>

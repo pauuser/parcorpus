@@ -26,6 +26,8 @@ public class UserDbModel
 
     public virtual CredentialDbModel CredentialNavigation { get; set; }
 
+    public virtual ICollection<JobDbModel> JobNavigation { get; set; } = new List<JobDbModel>();
+
     public virtual ICollection<TextDbModel> TextsNavigation { get; set; } = new List<TextDbModel>();
 
     public virtual ICollection<SearchHistoryDbModel> SearchHistoryNavigation { get; set; } = new List<SearchHistoryDbModel>();
