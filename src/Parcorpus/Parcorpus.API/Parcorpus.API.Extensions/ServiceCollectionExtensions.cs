@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Configuration;
@@ -44,6 +46,8 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(TokenConfiguration.ConfigurationSectionName);
         serviceCollection.AddOptions<QueueConfiguration>()
             .BindConfiguration(QueueConfiguration.ConfigurationSectionName);
+        serviceCollection.AddOptions<PagingConfiguration>()
+            .BindConfiguration(PagingConfiguration.ConfigurationSectionName);
         
         serviceCollection.AddTransient<IUserService, UserService>();
         serviceCollection.AddTransient<IAnnotationService, AnnotationService>();
@@ -87,7 +91,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddEndpointControllers(this IServiceCollection serviceCollection)
     {
-        var mvcBuilder = MvcServiceCollectionExtensions.AddControllers(serviceCollection);
+        var mvcBuilder = serviceCollection.AddControllers(options =>
+        {
+            options.InputFormatters.Insert(0, CustomJPIF.GetJsonPatchInputFormatter());
+        }).AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        });
         mvcBuilder.PartManager.ApplicationParts.Add(new AssemblyPart(typeof(AuthController).Assembly));
         serviceCollection.AddEndpointsApiExplorer();
         

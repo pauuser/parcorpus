@@ -12,7 +12,7 @@ public class UserDto
     /// </summary>
     /// <example>42594DCD-913F-473F-BDD3-DBFDDC075C8B</example>
     [JsonPropertyName("user_id")]
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
 
     /// <summary>
     /// User's name
@@ -60,7 +60,7 @@ public class UserDto
     /// <param name="email">email</param>
     /// <param name="countryName">country name</param>
     /// <param name="nativeLanguageShortName">language short name</param>
-    public UserDto(Guid? userId, 
+    public UserDto(Guid userId, 
         string name, 
         string surname, 
         string email, 

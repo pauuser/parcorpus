@@ -36,8 +36,12 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         {
             var cacheKey = GetConcordanceCacheKey(word, desiredLanguage, filter, paging);
             if (_cache.TryGetValue(cacheKey, out var cachedValue))
-                return (Paged<Concordance>) cachedValue!;
-            
+            {
+                Logger.LogInformation("Concordance extracted from cache for page {paging}, key {cacheKey}", paging,
+                    cacheKey);
+                return (Paged<Concordance>)cachedValue!;
+            }
+
             var concordance = _context.Words
                 .Where(w => w.SourceWord == word.WordForm)
                 .Include(w => w.SentenceNavigation)
@@ -49,12 +53,15 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                     .ThenInclude(s => s.TextNavigation)
                         .ThenInclude(t => t.LanguagePairNavigation)
                             .ThenInclude(lp => lp.FromLanguageNavigation)
-                .Where(w => w.SentenceNavigation.TextNavigation.LanguagePairNavigation.FromLanguageNavigation.ShortName == word.Language.ShortName)
+                .Where(w =>
+                    w.SentenceNavigation.TextNavigation.LanguagePairNavigation.FromLanguageNavigation.ShortName ==
+                    word.Language.ShortName)
                 .Include(w => w.SentenceNavigation)
                     .ThenInclude(s => s.TextNavigation)
                         .ThenInclude(lp => lp.LanguagePairNavigation)
                             .ThenInclude(lp => lp.ToLanguageNavigation)
-                .Where(w => w.SentenceNavigation.TextNavigation.LanguagePairNavigation.ToLanguageNavigation.ShortName == desiredLanguage.ShortName)
+                .Where(w => w.SentenceNavigation.TextNavigation.LanguagePairNavigation.ToLanguageNavigation.ShortName ==
+                            desiredLanguage.ShortName)
                 .Include(w => w.SentenceNavigation)
                     .ThenInclude(s => s.TextNavigation)
                         .ThenInclude(t => t.AddedByNavigation);
@@ -62,19 +69,37 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
             var filtered = concordance.ApplyFilters(filter);
             var totalCount = await filtered.CountAsync();
             if (paging.Specified)
+            {
+                if (paging.OutOfRange(totalCount))
+                {
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging,
+                        totalCount);
+                    throw new InvalidPagingException(
+                        $"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                }
+
                 filtered = filtered
-                    .Skip((paging.PageNumber.Value - 1) * paging.PageSize.Value)
+                    .Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
                     .Take(paging.PageSize.Value);
-            
-            var data = await filtered.ToListAsync();
-            var result = data.Select(ConcordanceConverter.ConvertWordToConcordance).ToList();
+            }
 
-            _cache.Set(cacheKey, result, absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(_cacheConfiguration.ConcordanceExpirationMinutes));
-
-            return new Paged<Concordance>(pageNumber: paging.PageNumber,
+            var queried = await filtered.ToListAsync();
+            var convertedResult = queried.Select(ConcordanceConverter.ConvertWordToConcordance).ToList();
+            var pagedResult = new Paged<Concordance>(pageNumber: paging.PageNumber,
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
-                items: result);
+                items: convertedResult);
+
+            _cache.Set(cacheKey, pagedResult,
+                absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(_cacheConfiguration
+                    .ConcordanceExpirationMinutes));
+            Logger.LogInformation("Cache value for key {cacheKey} was newly set", cacheKey);
+
+            return pagedResult;
+        }
+        catch (InvalidPagingException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -93,43 +118,85 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         return sb.ToString();
     }
 
-    public async Task<Text> GetTextById(int textId, PaginationParameters paging)
+    private string GetIdCacheKey<T>(T id, PaginationParameters paging)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendJoin("_", id, paging.PageNumber, paging.PageSize);
+
+        return sb.ToString();
+    }
+
+    public async Task<PagedText> GetTextById(int textId, PaginationParameters paging)
     {
         try
         {
-            if (_cache.TryGetValue(textId, out var cachedValue))
-                return (Text) cachedValue!;
-            
+            var cacheKey = GetIdCacheKey(textId, paging);
+            if (_cache.TryGetValue(cacheKey, out var cachedValue))
+            {
+                Logger.LogInformation("Text {textId} extracted from cache for page {paging}", textId, paging);
+                return (PagedText)cachedValue!;
+            }
+
             var text = _context.Texts
                 .Where(t => t.TextId == textId)
                 .Include(t => t.MetaAnnotationNavigation)
-                    .ThenInclude(m => m.MetaGenresNavigation)
-                        .ThenInclude(mg => mg.GenreNavigation)
+                .ThenInclude(m => m.MetaGenresNavigation)
+                .ThenInclude(mg => mg.GenreNavigation)
                 .Include(t => t.LanguagePairNavigation)
-                    .ThenInclude(lp => lp.FromLanguageNavigation)
+                .ThenInclude(lp => lp.FromLanguageNavigation)
                 .Include(lp => lp.LanguagePairNavigation)
-                    .ThenInclude(lp => lp.ToLanguageNavigation)
+                .ThenInclude(lp => lp.ToLanguageNavigation)
                 .Include(t => t.AddedByNavigation);
-            if (paging.Specified)
-                text.Include(t => t.SentencesNavigation)
-                    .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
-               .Take(validFilter.PageSize)
-                    .ThenInclude(s => s.WordsNavigation);
 
-            if (text is null)
+            var queriedText = await text.FirstOrDefaultAsync();
+            if (queriedText is null)
             {
                 Logger.LogError("Text with id = {textId} is not found", textId);
                 throw new NotFoundException($"Text with id = {textId} is not found");
             }
-            
+
+            var sentences = _context.Sentences
+                .Where(s => s.SourceTextId == textId)
+                .Include(s => s.WordsNavigation);
+            var totalCount = await sentences.CountAsync();
+
+            var queryableSentences = sentences.Where(_ => true);
+            if (paging.Specified)
+            {
+                if (paging.OutOfRange(totalCount))
+                {
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging,
+                        totalCount);
+                    throw new InvalidPagingException(
+                        $"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                }
+
+                queryableSentences = queryableSentences
+                    .Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
+                    .Take(paging.PageSize.Value);
+            }
+
+            queriedText.SentencesNavigation = await queryableSentences.ToListAsync();
+
             Logger.LogInformation("Successfully retrieved text with id = {id}", textId);
 
-            var result = TextConverter.ConvertDbModelToAppModel(text);
-            _cache.Set(textId, result);
-            
-            return result;
+            var converted = TextConverter.ConvertDbModelToAppModel(queriedText);
+            var pagedResult = new PagedText(sentencesPageNumber: paging.PageNumber,
+                sentencesPageSize: paging.PageSize,
+                sentencesTotalCount: totalCount,
+                text: converted);
+
+            _cache.Set(cacheKey, pagedResult);
+            Logger.LogInformation("New value for {cacheKey} was set", cacheKey);
+
+            return pagedResult;
         }
         catch (NotFoundException)
+        {
+            throw;
+        }
+        catch (InvalidPagingException)
         {
             throw;
         }
@@ -144,37 +211,58 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
     {
         try
         {
-            if (_cache.TryGetValue(userId, out var cachedValue))
-                return (Paged<Text>) cachedValue!;
-            
+            var cacheKey = GetIdCacheKey(userId, paging);
+            if (_cache.TryGetValue(cacheKey, out var cachedValue))
+            {
+                Logger.LogInformation("Texts of user {userId} extracted from cache for page {paging}", userId, paging);
+                return (Paged<Text>)cachedValue!;
+            }
+
             var texts = _context.Texts
                 .Include(t => t.AddedByNavigation)
                 .Where(t => t.AddedByNavigation!.UserId == userId)
                 .Include(t => t.MetaAnnotationNavigation)
-                    .ThenInclude(m => m.MetaGenresNavigation)
-                        .ThenInclude(mg => mg.GenreNavigation)
+                .ThenInclude(m => m.MetaGenresNavigation)
+                .ThenInclude(mg => mg.GenreNavigation)
                 .Include(t => t.LanguagePairNavigation)
-                    .ThenInclude(lp => lp.FromLanguageNavigation)
+                .ThenInclude(lp => lp.FromLanguageNavigation)
                 .Include(lp => lp.LanguagePairNavigation)
-                    .ThenInclude(lp => lp.ToLanguageNavigation);
+                .ThenInclude(lp => lp.ToLanguageNavigation);
             var totalCount = await texts.CountAsync();
 
             var paged = texts.Where(_ => true);
             if (paging.Specified)
+            {
+                if (paging.OutOfRange(totalCount))
+                {
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging,
+                        totalCount);
+                    throw new InvalidPagingException(
+                        $"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                }
+
                 paged = paged
                     .Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
                     .Take(paging.PageSize.Value);
-            
-            var pagedList = await paged.ToListAsync();
-            Logger.LogInformation("Successfully retrieved {count} texts for userId = {userId}", pagedList.Count, userId);
+            }
 
-            var result = pagedList.Select(TextConverter.ConvertDbModelToAppModel).ToList();
-            _cache.Set(userId, result);
-            
-            return new Paged<Text>(pageNumber: paging.PageNumber,
+            var pagedList = await paged.ToListAsync();
+            Logger.LogInformation("Successfully retrieved {count} texts for userId = {userId}", pagedList.Count,
+                userId);
+
+            var converted = pagedList.Select(TextConverter.ConvertDbModelToAppModel).ToList();
+            var pagedResult = new Paged<Text>(pageNumber: paging.PageNumber,
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
-                items: result);
+                items: converted);
+            _cache.Set(cacheKey, pagedResult);
+            Logger.LogInformation("New value for cache key {cacheKey} was set", cacheKey);
+
+            return pagedResult;
+        }
+        catch (InvalidPagingException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

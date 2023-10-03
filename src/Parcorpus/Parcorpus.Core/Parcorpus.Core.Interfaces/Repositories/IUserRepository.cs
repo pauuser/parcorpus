@@ -11,4 +11,6 @@ public interface IUserRepository
     Task DeleteUser(Guid userId);
 
     Task<User?> GetUserByEmail(string email);
+
+    Task<User> UpdateUser(User newUser);
 }

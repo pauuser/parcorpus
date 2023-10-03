@@ -7,4 +7,6 @@ public interface IUserService
     Task<User> GetUserById(Guid userId);
 
     Task<Paged<SearchHistoryRecord>> GetUserSearchHistory(Guid userId, PaginationParameters paging);
+
+    Task<User> UpdateUser(User initialUser, User patchedUser);
 }

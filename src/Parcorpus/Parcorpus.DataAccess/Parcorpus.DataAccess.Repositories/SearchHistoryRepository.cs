@@ -57,11 +57,19 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
             var history = _context.SearchHistory
                 .Where(sh => sh.UserId == userId);
             var totalCount = await history.CountAsync();
-            
+
             if (paging.Specified)
+            {
+                if (paging.OutOfRange(totalCount))
+                {
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging, totalCount);
+                    throw new InvalidPagingException($"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                }
+                
                 history = history.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
                     .Take(paging.PageSize.Value);
-            
+            }
+
             var result = await history.ToListAsync();
             
             return new Paged<SearchHistoryRecord>(pageNumber: paging.PageNumber,

@@ -44,17 +44,19 @@ public class AuthController : ControllerBase
     /// <param name="registrationDto">Registration information</param>
     /// <returns>Tokens</returns>
     /// <response code="200">OK. Tokens returned.</response>
+    /// <response code="400">BadRequest. Email is invalid.</response>
     /// <response code="409">Conflict. User already exists.</response>
     /// <response code="500">Internal server error.</response>
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokensDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Register([FromBody] UserRegistrationDto registrationDto)
     {
         try
         {
-            var tokens = await _authService.RegisterUser(UserConverter.ConvertDtoToAppModel(registrationDto,
+            var tokens = await _authService.RegisterUser(UserConverter.ConvertRegistrationDtoToAppModel(registrationDto,
                 new Language(registrationDto.LanguageShortName, _languagesConfiguration.LanguagesForms[registrationDto.LanguageShortName]), 
                 registrationDto.Password));
             
@@ -64,6 +66,16 @@ public class AuthController : ControllerBase
         {
             _logger.LogError(ex, "Conflict: {message}", ex.Message);
             return Conflict($"Conflict: {ex.Message}");
+        }
+        catch (FormatException ex)
+        {
+            _logger.LogError(ex, "Invalid format: {message}", ex.Message);
+            return BadRequest($"Invalid format: {ex.Message}");
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogError(ex, "Bad Request. Invalid language: {message}", ex.Message);
+            return BadRequest($"Bad Request. Invalid language: {ex.Message}");
         }
         catch (Exception ex)
         {

@@ -43,17 +43,17 @@ public class TextsController : ControllerBase
     /// Get word usage examples (word's concordance)
     /// </summary>
     /// <param name="query">Filters for the search</param>
-    /// <param name="page"></param>
-    /// <param name="pageSize"></param>
+    /// <param name="page">Number of the page</param>
+    /// <param name="pageSize">Size of the page</param>
     /// <returns>List of word usage examples</returns>
     /// <response code="200">OK. Concordance returned.</response>
-    /// <response code="400">Bad Request. Invalid input.</response>
+    /// <response code="400">Bad Request. Invalid input or invalid paging.</response>
     /// <response code="401">Unauthorized. User with the given id does not exist or he has no rights.</response>
     /// <response code="404">Not Found.</response>
     /// <response code="500">Internal server error.</response>
     [Authorize]
     [HttpGet("concordance")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ConcordanceDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedDto<ConcordanceDto>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -84,7 +84,7 @@ public class TextsController : ControllerBase
                     filters: FilterConverter.ConvertDtoToAppModel(query.Filter)),
                 paging: new PaginationParameters(page, pageSize));
 
-            return Ok(result.Select(ConcordanceConverter.ConvertAppModelToDto));
+            return Ok(PagedConverter.ConvertAppModelToDto(result));
         }
         catch (ArgumentException ex)
         {
@@ -101,6 +101,11 @@ public class TextsController : ControllerBase
             _logger.LogError(ex, "Not found: {message}", ex.Message);
             return NotFound($"Not found: {ex.Message}");
         }
+        catch (InvalidPagingException ex)
+        {
+            _logger.LogError(ex, "Bad Request: paging is invalid. See: {message}", ex.Message);
+            return BadRequest("Bad Request: Paging is invalid.");
+        }
         catch (Exception ex)
         {
             _logger.LogError("Internal server error: {message}", ex.Message);
@@ -111,14 +116,18 @@ public class TextsController : ControllerBase
     /// <summary>
     /// Get texts uploaded by the user
     /// </summary>
+    /// <param name="page">Number of the page</param>
+    /// <param name="pageSize">Size of the page</param>
     /// <returns>List of text records</returns>
     /// <response code="200">OK. Texts returned.</response>
+    /// <response code="400">Bad request. Invalid paging.</response>
     /// <response code="401">Unauthorized. User with the given id does not exist or he has no rights.</response>
     /// <response code="404">Not found. Information for the given user is not found.</response>
     /// <response code="500">Internal server error.</response>
     [Authorize]
     [HttpGet("texts")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TextDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedDto<TextDto>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -131,12 +140,17 @@ public class TextsController : ControllerBase
             var result = await _languageService.GetTextsAddedByUser(userId: userId,
                 paging: new PaginationParameters(page, pageSize));
             
-            return Ok(result.Select(TextConverter.ConvertAppModelToDto));
+            return Ok(PagedConverter.ConvertAppModelToDto(result));
         }
         catch (NoTokenException ex)
         {
             _logger.LogError("Unauthorized: {message}", ex.Message);
             return Unauthorized($"Unauthorized: {ex.Message}");
+        }
+        catch (InvalidPagingException ex)
+        {
+            _logger.LogError(ex, "Bad Request: paging is invalid. See: {message}", ex.Message);
+            return BadRequest("Bad Request: Paging is invalid.");
         }
         catch (NotFoundException ex)
         {
@@ -154,13 +168,16 @@ public class TextsController : ControllerBase
     /// Get text by Id
     /// </summary>
     /// <returns>List of text records</returns>
+    /// <remarks>Paging is specified for sentences.</remarks>
     /// <response code="200">OK. Texts returned.</response>
+    /// <response code="400">Bad request. Invalid paging.</response>
     /// <response code="401">Unauthorized. User with the given id does not exist or he has no rights.</response>
     /// <response code="404">Not found. Information for the given user is not found.</response>
     /// <response code="500">Internal server error.</response>
     [Authorize]
     [HttpGet("texts/{textId:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullTextDto))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedTextDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -173,12 +190,17 @@ public class TextsController : ControllerBase
             var result = await _languageService.GetTextById(textId: textId,
                 paging: new PaginationParameters(page, pageSize));
             
-            return Ok(TextConverter.ConvertFullTextToDto(result));
+            return Ok(PagedConverter.ConvertAppModelToDto(result));
         }
         catch (NoTokenException ex)
         {
             _logger.LogError("Unauthorized: {message}", ex.Message);
             return Unauthorized($"Unauthorized: {ex.Message}");
+        }
+        catch (InvalidPagingException ex)
+        {
+            _logger.LogError(ex, "Bad Request: paging is invalid. See: {message}", ex.Message);
+            return BadRequest("Bad Request: Paging is invalid.");
         }
         catch (NotFoundException ex)
         {

@@ -1,4 +1,5 @@
-﻿using Parcorpus.API.Dto.Enums;
+﻿using System.Text.Json.Serialization;
+using Parcorpus.API.Dto.Enums;
 
 namespace Parcorpus.API.Dto;
 
@@ -10,11 +11,13 @@ public class JobDto
     /// <summary>
     /// Id
     /// </summary>
+    [JsonPropertyName("job_id")]
     public Guid JobId { get; set; }
 
     /// <summary>
     /// Status of the job
     /// </summary>
+    [JsonPropertyName("job_status")]
     public JobStatusDto JobStatus { get; set; }
 
     /// <summary>

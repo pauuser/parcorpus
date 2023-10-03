@@ -134,4 +134,55 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
             throw new AuthRepositoryException($"Error during getting user by email {email}", ex);
         }
     }
+
+    public async Task<User> UpdateUser(User newUser)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == newUser.UserId);
+            if (user is null)
+            {
+                Logger.LogError("User with id {userId} is not found.", newUser.UserId);
+                throw new NotFoundException($"User with id {newUser.UserId} is not found.");
+            }
+
+            var countryName = newUser.Country.CountryName;
+            var country = await _context.Countries.FirstOrDefaultAsync(c => c.Name.Equals(countryName));
+            if (country is null)
+            {
+                Logger.LogError("Country with name {countryName} is not found.", countryName);
+                throw new NotFoundException($"Country with name {countryName} is not found.");
+            }
+
+            var language =
+                await _context.Languages.FirstOrDefaultAsync(l => l.ShortName == newUser.NativeLanguage.ShortName);
+            if (language is null)
+            {
+                Logger.LogError("Language with short name {languageShortName} is not found.",
+                    newUser.NativeLanguage.ShortName);
+                throw new NotFoundException(
+                    $"Language with short name {newUser.NativeLanguage.ShortName} is not found.");
+            }
+
+            user.Country = country.CountryId;
+            user.CountryNavigation = country;
+            user.Name = newUser.Name.Name;
+            user.Surname = newUser.Name.Surname;
+            user.NativeLanguage = language.LanguageId;
+            user.NativeLanguageNavigation = language;
+
+            await _context.SaveChangesAsync();
+
+            return UserConverter.ConvertDbModelToAppModel(user)!;
+        }
+        catch (NotFoundException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }

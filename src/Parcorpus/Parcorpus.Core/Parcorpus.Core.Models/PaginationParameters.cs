@@ -1,4 +1,6 @@
-﻿namespace Parcorpus.Core.Models;
+﻿using System.Text;
+
+namespace Parcorpus.Core.Models;
 
 public sealed class PaginationParameters
 {
@@ -8,6 +10,15 @@ public sealed class PaginationParameters
     
     public bool Specified => PageNumber is not null && PageSize is not null;
 
+    public bool OutOfRange(int totalCount)
+    {
+        var totalPages = totalCount / PageSize!.Value;
+        if (totalCount % PageSize.Value != 0)
+            totalPages++;
+
+        return PageNumber < 1 || PageNumber > totalPages;
+    }
+
     public PaginationParameters(int? pageNumber, int? pageSize)
     {
         if (pageNumber is null && pageSize is not null ||
@@ -16,5 +27,15 @@ public sealed class PaginationParameters
         
         PageNumber = pageNumber;
         PageSize = pageSize;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+
+        sb.Append($"PageNumber: {PageNumber}");
+        sb.Append($"PageSize: {PageSize}");
+
+        return sb.ToString();
     }
 }

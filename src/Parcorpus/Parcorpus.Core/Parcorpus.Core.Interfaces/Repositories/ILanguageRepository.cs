@@ -14,5 +14,5 @@ public interface ILanguageRepository
 
     Task<bool> TextExists(MetaAnnotation metaAnnotation, Language sourceLanguage, Language targetLanguage);
 
-    Task<Text> GetTextById(int textId, PaginationParameters paging);
+    Task<PagedText> GetTextById(int textId, PaginationParameters paging);
 }

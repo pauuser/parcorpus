@@ -10,5 +10,5 @@ public interface ILanguageService
 
     Task<Paged<Text>> GetTextsAddedByUser(Guid userId, PaginationParameters paging);
 
-    Task<Text> GetTextById(int textId, PaginationParameters paging);
+    Task<PagedText> GetTextById(int textId, PaginationParameters paging);
 }

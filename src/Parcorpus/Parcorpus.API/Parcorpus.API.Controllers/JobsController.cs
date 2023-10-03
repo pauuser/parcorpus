@@ -30,6 +30,7 @@ public class JobsController : ControllerBase
     /// </summary>
     /// <param name="jobService">Job service</param>
     /// <param name="logger">logger</param>
+    /// <param name="configuration"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public JobsController(IJobService jobService, 
         ILogger<JobsController> logger,
@@ -90,6 +91,11 @@ public class JobsController : ControllerBase
 
             return Ok(JobConverter.ConvertAppModelToDto(job));
         }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogError(ex, "Bad Request. Invalid language: {message}", ex.Message);
+            return BadRequest($"Bad Request. Invalid language: {ex.Message}");
+        }
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, "Bad Request: {message}", ex.Message);
@@ -117,12 +123,14 @@ public class JobsController : ControllerBase
     /// </summary>
     /// <returns>Nothing</returns>
     /// <response code="200">Ok.</response>
+    /// <response code="400">Bad request. Invalid paging.</response>
     /// <response code="401">Unauthorized. Such user id doesn't belong to any user.</response>
     /// <response code="404">Not found. User has no jobs.</response>
     /// <response code="500">Internal server error.</response>
     [Authorize]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<JobDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Paged<JobDto>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -134,13 +142,18 @@ public class JobsController : ControllerBase
             var userId = HttpContext.Request.GetUserId();
             var jobs = await _jobService.GetUserJobs(userId: userId,
                 paging: new PaginationParameters(page, pageSize));
-            
-            return Ok(jobs.Select(JobConverter.ConvertAppModelToDto));
+
+            return Ok(PagedConverter.ConvertAppModelToDto(jobs));
         }
         catch (NoTokenException ex)
         {
             _logger.LogError(ex, "Unauthorized: {message}", ex.Message);
             return Unauthorized($"Unauthorized: {ex.Message}");
+        }
+        catch (InvalidPagingException ex)
+        {
+            _logger.LogError(ex, "Bad Request: paging is invalid. See: {message}", ex.Message);
+            return BadRequest("Bad Request: Paging is invalid.");
         }
         catch (JobNotFoundException ex)
         {
@@ -164,7 +177,7 @@ public class JobsController : ControllerBase
     /// <response code="500">Internal server error.</response>
     [Authorize]
     [HttpGet("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<JobDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JobDto))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

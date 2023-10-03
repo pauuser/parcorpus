@@ -9,14 +9,12 @@ using Parcorpus.DataAccess.Converters;
 
 namespace Parcorpus.DataAccess.Repositories;
 
-public class JobRepository : IJobRepository
+public class JobRepository : BaseRepository<JobRepository>, IJobRepository
 {
-    private readonly ILogger<JobRepository> _logger;
     private readonly ParcorpusDbContext _context;
 
-    public JobRepository(ILogger<JobRepository> logger, ParcorpusDbContext context)
+    public JobRepository(ILogger<JobRepository> logger, ParcorpusDbContext context) : base(logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
@@ -29,13 +27,13 @@ public class JobRepository : IJobRepository
             var entity = entry.Entity;
 
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Job with Id {id} successfully added", entity.JobId);
+            Logger.LogInformation("Job with Id {id} successfully added", entity.JobId);
 
             return JobConverter.ConvertDbModelToAppModel(entity);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while adding job: {message}", ex.Message);
+            Logger.LogError(ex, "Error while adding job: {message}", ex.Message);
             throw new JobRepositoryException($"Error while adding job: {ex.Message}", ex);
         }
     }
@@ -47,10 +45,10 @@ public class JobRepository : IJobRepository
             var job = await _context.Jobs.FirstOrDefaultAsync(j => j.JobId == jobId);
             if (job is null)
             {
-                _logger.LogError("Job with id {jobId} does not exist", jobId);
+                Logger.LogError("Job with id {jobId} does not exist", jobId);
                 throw new JobNotFoundException($"Job with id {jobId} does not exist");
             }
-            _logger.LogInformation("Successfully retrieved job with id {jobId} in status {status}", jobId, job.JobStatus);
+            Logger.LogInformation("Successfully retrieved job with id {jobId} in status {status}", jobId, job.JobStatus);
 
             return JobConverter.ConvertDbModelToAppModel(job);
         }
@@ -60,7 +58,7 @@ public class JobRepository : IJobRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while getting job by id: {message}", ex.Message);
+            Logger.LogError(ex, "Error while getting job by id: {message}", ex.Message);
             throw new JobRepositoryException($"Error while getting job by id: {ex.Message}", ex);
         }
     }
@@ -72,14 +70,14 @@ public class JobRepository : IJobRepository
             var job = await _context.Jobs.FirstOrDefaultAsync(j => j.JobId == jobId);
             if (job is null)
             {
-                _logger.LogError("Job with id {jobId} does not exist", jobId);
+                Logger.LogError("Job with id {jobId} does not exist", jobId);
                 throw new JobNotFoundException($"Job with id {jobId} does not exist");
             }
-            _logger.LogInformation("Successfully retrieved job with id {jobId} in status {status}", jobId, job.JobStatus);
+            Logger.LogInformation("Successfully retrieved job with id {jobId} in status {status}", jobId, job.JobStatus);
 
             job.JobStatus = JobStatusConverter.ConvertAppModelToDbModel(newStatus);
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Changes job {id} status to {status}", jobId, job.JobStatus);
+            Logger.LogInformation("Changes job {id} status to {status}", jobId, job.JobStatus);
 
             return JobConverter.ConvertDbModelToAppModel(job);
         }
@@ -89,7 +87,7 @@ public class JobRepository : IJobRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while updating job status for job {id}: {message}", jobId, ex.Message);
+            Logger.LogError(ex, "Error while updating job status for job {id}: {message}", jobId, ex.Message);
             throw new JobRepositoryException($"Error while updating job status for job {jobId}: {ex.Message}", ex);
         }
     }
@@ -98,22 +96,35 @@ public class JobRepository : IJobRepository
     {
         try
         {
-            var jobs = _context.Jobs.Where(j => j.UserId == userId);
+            var jobs = _context.Jobs
+                .Where(j => j.UserId == userId);
             var totalCount = await jobs.CountAsync();
-            
+
             if (paging.Specified)
+            {
+                if (paging.OutOfRange(totalCount))
+                {
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging,
+                        totalCount);
+                    throw new InvalidPagingException(
+                        $"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                }
+
                 jobs = jobs.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
                     .Take(paging.PageSize.Value);
+            }
 
-            var result = await jobs.ToListAsync();
-            
+            var result = await jobs.OrderByDescending(j => j.StartedTimeUtc).ToListAsync();
+
             if (result is null)
             {
-                _logger.LogError("Jobs of user id {userId} do not exist", userId);
+                Logger.LogError("Jobs of user id {userId} do not exist", userId);
                 throw new JobNotFoundException($"Jobs with user id {userId} do not exist");
             }
-            _logger.LogInformation("Successfully retrieved jobs of userId {userId}, count: {count}", userId, result.Count);
-            
+
+            Logger.LogInformation("Successfully retrieved jobs of userId {userId}, count: {count}", userId,
+                result.Count);
+
             return new Paged<ProgressJob>(pageNumber: paging.PageNumber,
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
@@ -123,9 +134,13 @@ public class JobRepository : IJobRepository
         {
             throw;
         }
+        catch (InvalidPagingException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while getting user jobs for user {userId}: {message}", userId, ex.Message);
+            Logger.LogError(ex, "Error while getting user jobs for user {userId}: {message}", userId, ex.Message);
             throw new JobRepositoryException($"Error while getting user jobs for user {userId}: {ex.Message}", ex);
         }
     }

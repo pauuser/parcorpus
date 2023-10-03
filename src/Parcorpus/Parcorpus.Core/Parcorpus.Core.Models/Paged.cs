@@ -14,15 +14,15 @@ public class Paged<T>
 
     public Paged(int? pageNumber, int? pageSize, int totalCount, List<T> items)
     {
-        if (pageNumber is null)
-            pageNumber = 1;
-        if (pageSize is null)
-            pageSize = totalCount;
+        pageNumber ??= 1;
+        pageSize ??= totalCount;
         var totalPages = totalCount / pageSize.Value;
+        if (totalCount % pageSize.Value != 0)
+            totalPages++;
         
         PageNumber = pageNumber.Value;
         PageSize = pageSize.Value;
-        TotalPages = totalPages == 0 ? 1 : totalPages;
+        TotalPages = totalPages;
         TotalCount = totalCount;
         Items = items;
     }
