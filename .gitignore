@@ -688,3 +688,5 @@ filebeat_ingest_data
 elasticsearch-data
 
 *.DotSettings
+
+rabbitmq
