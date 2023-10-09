@@ -1,6 +1,6 @@
 ﻿using Parcorpus.Core.Configuration;
 
-namespace Parcorpus.UnitTests.Services.Factories;
+namespace Parcorpus.UnitTests.Common.Factories.CoreModels;
 
 public static class TokenConfigurationFactory
 {

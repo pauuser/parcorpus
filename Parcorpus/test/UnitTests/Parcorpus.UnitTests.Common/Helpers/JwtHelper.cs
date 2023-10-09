@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Parcorpus.Core.Configuration;
 
-namespace Parcorpus.UnitTests.Services.Helpers;
+namespace Parcorpus.UnitTests.Common.Helpers;
 
 public static class JwtHelper
 {

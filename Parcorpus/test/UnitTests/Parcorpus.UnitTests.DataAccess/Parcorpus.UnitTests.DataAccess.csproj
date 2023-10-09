@@ -10,8 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.10" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0"/>
-        <PackageReference Include="Moq" Version="4.20.69" />
+        <PackageReference Include="Moq.EntityFrameworkCore" Version="7.0.0.2" />
         <PackageReference Include="xunit" Version="2.4.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,31 +26,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
-      <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.AnnotationService\Parcorpus.Services.AnnotationService.csproj" />
-      <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.AuthService\Parcorpus.Services.AuthService.csproj" />
-      <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.JobService\Parcorpus.Services.JobService.csproj" />
-      <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.LanguageService\Parcorpus.Services.LanguageService.csproj" />
-      <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.UserService\Parcorpus.Services.UserService.csproj" />
+      <ProjectReference Include="..\..\..\src\Parcorpus.DataAccess\Parcorpus.DataAccess.Context\Parcorpus.DataAccess.Context.csproj" />
+      <ProjectReference Include="..\..\..\src\Parcorpus.DataAccess\Parcorpus.DataAccess.Repositories\Parcorpus.DataAccess.Repositories.csproj" />
       <ProjectReference Include="..\Parcorpus.UnitTests.Common\Parcorpus.UnitTests.Common.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="..\..\..\src\Parcorpus.API\Parcorpus.API\appsettings.json" link="appsettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-
-
-    <ItemGroup>
-      <Reference Include="Microsoft.AspNetCore.Mvc.Core" />
-    </ItemGroup>
-
-
-
-
-
-
 
 </Project>

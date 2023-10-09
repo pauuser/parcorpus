@@ -44,7 +44,7 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error during getting user by id = {userId}", userId);
-            throw new AuthRepositoryException($"Error during getting user by id = {userId}", ex);
+            throw new UserRepositoryException($"Error during getting user by id = {userId}", ex);
         }
     }
 
@@ -60,11 +60,14 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
                 throw new NotFoundException($"Country with name {countryName} is not found.");
             }
 
-            var language = await _context.Languages.FirstOrDefaultAsync(l => l.ShortName == newUser.NativeLanguage.ShortName);
+            var language =
+                await _context.Languages.FirstOrDefaultAsync(l => l.ShortName == newUser.NativeLanguage.ShortName);
             if (language is null)
             {
-                Logger.LogError("Language with short name {languageShortName} is not found.", newUser.NativeLanguage.ShortName);
-                throw new NotFoundException($"Language with short name {newUser.NativeLanguage.ShortName} is not found.");
+                Logger.LogError("Language with short name {languageShortName} is not found.",
+                    newUser.NativeLanguage.ShortName);
+                throw new NotFoundException(
+                    $"Language with short name {newUser.NativeLanguage.ShortName} is not found.");
             }
 
             var userDb = new UserDbModel(userId: Guid.Empty,
@@ -85,33 +88,14 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
 
             return UserConverter.ConvertDbModelToAppModel(entity);
         }
+        catch (NotFoundException ex)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Logger.LogInformation(ex, "Error during registering user");
-            throw new AuthRepositoryException("Error during registering user", ex);
-        }
-    }
-
-    public async Task DeleteUser(Guid userId)
-    {
-        try
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user is null)
-            {
-                Logger.LogError("User with id {userId} is not found.", userId);
-                throw new NotFoundException($"User with id {userId} is not found.");
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-        
-            Logger.LogInformation("User with id = {userId} successfully deleted", userId);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error during deleting user with id {userId}", userId);
-            throw new AuthRepositoryException($"Error during deleting user with id {userId}", ex);
+            throw new UserRepositoryException("Error during registering user", ex);
         }
     }
 
@@ -131,7 +115,7 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error during getting user by email {email}", email);
-            throw new AuthRepositoryException($"Error during getting user by email {email}", ex);
+            throw new UserRepositoryException($"Error during getting user by email {email}", ex);
         }
     }
 
@@ -179,10 +163,10 @@ public class UserRepository : BaseRepository<UserRepository>, IUserRepository
         {
             throw;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
-            throw;
+            Logger.LogError(ex, "Error during updating user");
+            throw new UserRepositoryException($"Error during updating user", ex);
         }
     }
 }

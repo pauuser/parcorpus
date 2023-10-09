@@ -1,13 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Interfaces;
 using Parcorpus.Core.Models;
 using Parcorpus.Services.AnnotationService;
-using Parcorpus.UnitTests.Services.Factories;
-using Parcorpus.UnitTests.Services.Helpers;
+using Parcorpus.UnitTests.Common.Factories;
+using Parcorpus.UnitTests.Common.Factories.CoreModels;
+using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 

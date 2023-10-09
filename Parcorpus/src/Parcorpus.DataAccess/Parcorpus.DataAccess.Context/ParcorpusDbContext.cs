@@ -5,31 +5,31 @@ namespace Parcorpus.DataAccess.Context;
 
 public partial class ParcorpusDbContext : DbContext
 {
-    public DbSet<CountryDbModel> Countries { get; set; }
+    public virtual DbSet<CountryDbModel> Countries { get; set; }
     
-    public DbSet<GenreDbModel> Genres { get; set; }
+    public virtual DbSet<GenreDbModel> Genres { get; set; }
     
-    public DbSet<LanguageDbModel> Languages { get; set; }
+    public virtual DbSet<LanguageDbModel> Languages { get; set; }
     
-    public DbSet<LanguagePairDbModel> LanguagePairs { get; set; }
+    public virtual DbSet<LanguagePairDbModel> LanguagePairs { get; set; }
     
-    public DbSet<MetaAnnotationDbModel> MetaAnnotations { get; set; }
+    public virtual DbSet<MetaAnnotationDbModel> MetaAnnotations { get; set; }
 
-    public DbSet<MetaGenreDbModel> MetaGenres { get; set; }
+    public virtual DbSet<MetaGenreDbModel> MetaGenres { get; set; }
 
-    public DbSet<SentenceDbModel> Sentences { get; set; }
+    public virtual DbSet<SentenceDbModel> Sentences { get; set; }
     
-    public DbSet<TextDbModel> Texts { get; set; }
+    public virtual DbSet<TextDbModel> Texts { get; set; }
     
-    public DbSet<UserDbModel> Users { get; set; }
+    public virtual DbSet<UserDbModel> Users { get; set; }
     
-    public DbSet<WordDbModel> Words { get; set; }
+    public virtual DbSet<WordDbModel> Words { get; set; }
 
-    public DbSet<CredentialDbModel> Credentials { get; set; }
+    public virtual DbSet<CredentialDbModel> Credentials { get; set; }
 
-    public DbSet<SearchHistoryDbModel> SearchHistory { get; set; }
+    public virtual DbSet<SearchHistoryDbModel> SearchHistory { get; set; }
 
-    public DbSet<JobDbModel> Jobs { get; set; }
+    public virtual DbSet<JobDbModel> Jobs { get; set; }
 
     public ParcorpusDbContext(DbContextOptions<ParcorpusDbContext> options) : base(options)
     {

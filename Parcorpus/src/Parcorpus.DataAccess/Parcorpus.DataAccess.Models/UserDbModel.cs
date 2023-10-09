@@ -2,7 +2,7 @@
 
 namespace Parcorpus.DataAccess.Models;
 
-public class UserDbModel
+public class UserDbModel : IEquatable<UserDbModel>
 {
     public Guid UserId { get; set; }
 
@@ -51,5 +51,51 @@ public class UserDbModel
 
     public UserDbModel()
     {
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(UserDbModel? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        
+        return UserId.Equals(other.UserId) && 
+               Name == other.Name && 
+               Surname == other.Surname && 
+               Email == other.Email && 
+               Country == other.Country && 
+               NativeLanguage == other.NativeLanguage && 
+               PasswordHash == other.PasswordHash && 
+               CountryNavigation.Equals(other.CountryNavigation) && 
+               NativeLanguageNavigation.Equals(other.NativeLanguageNavigation) && 
+               CredentialNavigation.Equals(other.CredentialNavigation) && 
+               JobNavigation.Equals(other.JobNavigation) && 
+               TextsNavigation.Equals(other.TextsNavigation) && 
+               SearchHistoryNavigation.Equals(other.SearchHistoryNavigation);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(UserId);
+        hashCode.Add(Name);
+        hashCode.Add(Surname);
+        hashCode.Add(Email);
+        hashCode.Add(Country);
+        hashCode.Add(NativeLanguage);
+        hashCode.Add(PasswordHash);
+        hashCode.Add(CountryNavigation);
+        hashCode.Add(NativeLanguageNavigation);
+        hashCode.Add(CredentialNavigation);
+        hashCode.Add(JobNavigation);
+        hashCode.Add(TextsNavigation);
+        hashCode.Add(SearchHistoryNavigation);
+        return hashCode.ToHashCode();
     }
 }

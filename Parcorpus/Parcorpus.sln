@@ -58,6 +58,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.Services", "test\UnitTests\Parcorpus.UnitTests.Services\Parcorpus.UnitTests.Services.csproj", "{3A448831-6439-4A83-886A-F66B8D1F37CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.DataAccess", "test\UnitTests\Parcorpus.UnitTests.DataAccess\Parcorpus.UnitTests.DataAccess.csproj", "{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.Common", "test\UnitTests\Parcorpus.UnitTests.Common\Parcorpus.UnitTests.Common.csproj", "{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -152,6 +156,14 @@ Global
 		{3A448831-6439-4A83-886A-F66B8D1F37CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A448831-6439-4A83-886A-F66B8D1F37CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A448831-6439-4A83-886A-F66B8D1F37CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6EF4D583-6A59-416B-97D2-3F0EA0419EC6} = {B55C1BC1-757C-40C6-906D-F18AE377A536}
@@ -181,5 +193,7 @@ Global
 		{B55C1BC1-757C-40C6-906D-F18AE377A536} = {8FACDF63-FA46-4134-9F8B-9640760B40E2}
 		{6EB95F2D-5CD3-40AA-BE1D-68C672C28207} = {271613BA-B8C6-42B7-8DFC-C21B97D4C153}
 		{3A448831-6439-4A83-886A-F66B8D1F37CE} = {6EB95F2D-5CD3-40AA-BE1D-68C672C28207}
+		{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F} = {6EB95F2D-5CD3-40AA-BE1D-68C672C28207}
+		{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79} = {6EB95F2D-5CD3-40AA-BE1D-68C672C28207}
 	EndGlobalSection
 EndGlobal

@@ -1,6 +1,6 @@
 ﻿namespace Parcorpus.Core.Models;
 
-public sealed class Text
+public sealed class Text : IEquatable<Text>
 {
     public int TextId { get; set; }
     
@@ -47,5 +47,48 @@ public sealed class Text
         Genres = genres;
         Sentences = sentences;
         AddedBy = addedBy;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(Text? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+        
+        return TextId == other.TextId && 
+               Title == other.Title && 
+               Author == other.Author && 
+               Source == other.Source && 
+               CreationYear == other.CreationYear && 
+               AddDate.Equals(other.AddDate) && 
+               SourceLanguage.Equals(other.SourceLanguage) && 
+               TargetLanguage.Equals(other.TargetLanguage) && 
+               Genres.Equals(other.Genres) && 
+               Sentences.Equals(other.Sentences) && 
+               AddedBy.Equals(other.AddedBy);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(TextId);
+        hashCode.Add(Title);
+        hashCode.Add(Author);
+        hashCode.Add(Source);
+        hashCode.Add(CreationYear);
+        hashCode.Add(AddDate);
+        hashCode.Add(SourceLanguage);
+        hashCode.Add(TargetLanguage);
+        hashCode.Add(Genres);
+        hashCode.Add(Sentences);
+        hashCode.Add(AddedBy);
+        
+        return hashCode.ToHashCode();
     }
 }

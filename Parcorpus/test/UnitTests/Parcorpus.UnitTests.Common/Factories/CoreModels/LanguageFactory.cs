@@ -1,7 +1,7 @@
 ﻿using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Models;
 
-namespace Parcorpus.UnitTests.Services.Factories;
+namespace Parcorpus.UnitTests.Common.Factories.CoreModels;
 
 public static class LanguageFactory
 {

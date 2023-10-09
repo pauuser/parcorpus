@@ -43,7 +43,7 @@ public class Paged<T> : IEquatable<Paged<T>>
                PageSize == other.PageSize && 
                TotalPages == other.TotalPages && 
                TotalCount == other.TotalCount && 
-               Items.Equals(other.Items);
+               Items.SequenceEqual(other.Items);
     }
 
     public override int GetHashCode()

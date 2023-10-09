@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using IConfiguration = Castle.Core.Configuration.IConfiguration;
 
-namespace Parcorpus.UnitTests.Services.Helpers;
+namespace Parcorpus.UnitTests.Common.Helpers;
 
 public static class ConfigurationHelper
 {

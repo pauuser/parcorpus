@@ -1,6 +1,7 @@
 ﻿using Parcorpus.Core.Models;
+using Parcorpus.DataAccess.Models;
 
-namespace Parcorpus.UnitTests.Services.Factories;
+namespace Parcorpus.UnitTests.Common.Factories.CoreModels;
 
 public static class CredentialsFactory
 {
@@ -13,5 +14,10 @@ public static class CredentialsFactory
             userId ?? Guid.Empty, 
             refreshToken, 
             tokenExpiresAtUtc ?? DateTime.UtcNow + TimeSpan.FromDays(1));
+    }
+
+    public static Credential Create(CredentialDbModel dbModel)
+    {
+        return new Credential(dbModel.CredentialId, dbModel.UserId, dbModel.RefreshToken, dbModel.TokenExpiresAtUtc);
     }
 }

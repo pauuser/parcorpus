@@ -6,8 +6,9 @@ using Parcorpus.Core.Exceptions;
 using Parcorpus.Core.Interfaces;
 using Parcorpus.Core.Models;
 using Parcorpus.Services.UserService;
-using Parcorpus.UnitTests.Services.Factories;
-using Parcorpus.UnitTests.Services.Helpers;
+using Parcorpus.UnitTests.Common.Factories;
+using Parcorpus.UnitTests.Common.Factories.CoreModels;
+using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 

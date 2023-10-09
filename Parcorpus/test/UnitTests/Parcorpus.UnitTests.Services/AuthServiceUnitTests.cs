@@ -7,8 +7,9 @@ using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Exceptions;
 using Parcorpus.Core.Interfaces;
 using Parcorpus.Services.AuthService;
-using Parcorpus.UnitTests.Services.Factories;
-using Parcorpus.UnitTests.Services.Helpers;
+using Parcorpus.UnitTests.Common.Factories;
+using Parcorpus.UnitTests.Common.Factories.CoreModels;
+using Parcorpus.UnitTests.Common.Helpers;
 using HashHelper = Parcorpus.UnitTests.Services.Helpers.HashHelper;
 
 namespace Parcorpus.UnitTests.Services;

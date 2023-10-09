@@ -1,6 +1,6 @@
 ﻿namespace Parcorpus.Core.Models;
 
-public class Credential
+public class Credential : IEquatable<Credential>
 {
     public int CredentialId { get; set; }
 
@@ -16,5 +16,28 @@ public class Credential
         UserId = userId;
         RefreshToken = refreshToken;
         TokenExpiresAtUtc = tokenExpiresAtUtc;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(Credential? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        
+        return CredentialId == other.CredentialId && 
+               UserId.Equals(other.UserId) && 
+               RefreshToken == other.RefreshToken && 
+               TokenExpiresAtUtc.Equals(other.TokenExpiresAtUtc);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(CredentialId, UserId, RefreshToken, TokenExpiresAtUtc);
     }
 }

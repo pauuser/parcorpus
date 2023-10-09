@@ -82,9 +82,9 @@ public static class ServiceCollectionExtensions
                 ValidateIssuerSigningKey = true,
                 ClockSkew = TimeSpan.Zero,
 
-                ValidAudience = configuration["JWT:Audience"],
-                ValidIssuer = configuration["JWT:Issuer"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
+                ValidAudience = configuration["TokenConfiguration:Audience"],
+                ValidIssuer = configuration["TokenConfiguration:Issuer"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenConfiguration:Key"]))
             };
         });
         

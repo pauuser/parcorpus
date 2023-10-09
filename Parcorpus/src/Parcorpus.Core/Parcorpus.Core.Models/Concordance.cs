@@ -1,6 +1,6 @@
 ﻿namespace Parcorpus.Core.Models;
 
-public sealed class Concordance
+public sealed class Concordance : IEquatable<Concordance>
 {
     public string SourceWord { get; set; }
 
@@ -39,5 +39,44 @@ public sealed class Concordance
         Source = source;
         CreationYear = creationYear;
         AddDate = addDate;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(Concordance? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        
+        return SourceWord == other.SourceWord && 
+               AlignedWord == other.AlignedWord && 
+               SourceText == other.SourceText && 
+               AlignedTranslation == other.AlignedTranslation && 
+               Title == other.Title && 
+               Author == other.Author && 
+               Source == other.Source && 
+               CreationYear == other.CreationYear && 
+               AddDate.Equals(other.AddDate);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(SourceWord);
+        hashCode.Add(AlignedWord);
+        hashCode.Add(SourceText);
+        hashCode.Add(AlignedTranslation);
+        hashCode.Add(Title);
+        hashCode.Add(Author);
+        hashCode.Add(Source);
+        hashCode.Add(CreationYear);
+        hashCode.Add(AddDate);
+        
+        return hashCode.ToHashCode();
     }
 }
