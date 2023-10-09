@@ -29,7 +29,7 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
                 Logger.LogError("User with id = {userId} not found, cannot add search history", userId);
                 throw new NotFoundException("User with id = {userId} not found, cannot add search history");
             }
-            
+
             var searchHistory = new SearchHistoryDbModel(searchHistoryId: default,
                 userId: userId,
                 query: new HistoryJsonDbModel(word: query.SourceWord.WordForm,
@@ -42,6 +42,10 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
 
             await _context.SaveChangesAsync();
             Logger.LogInformation("Search history record for userId = {userId} was added", userId);
+        }
+        catch (NotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -62,20 +66,26 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
             {
                 if (paging.OutOfRange(totalCount))
                 {
-                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging, totalCount);
-                    throw new InvalidPagingException($"Paging error: {paging} is invalid for totalCount = {totalCount}");
+                    Logger.LogError("Paging error: {paging} is invalid for totalCount = {totalCount}", paging,
+                        totalCount);
+                    throw new InvalidPagingException(
+                        $"Paging error: {paging} is invalid for totalCount = {totalCount}");
                 }
-                
+
                 history = history.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
                     .Take(paging.PageSize.Value);
             }
 
             var result = await history.ToListAsync();
-            
+
             return new Paged<SearchHistoryRecord>(pageNumber: paging.PageNumber,
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
                 items: result.Select(SearchHistoryConverter.ConvertDbModelToAppModel).ToList());
+        }
+        catch (InvalidPagingException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

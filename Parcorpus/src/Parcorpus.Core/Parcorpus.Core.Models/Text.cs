@@ -69,8 +69,8 @@ public sealed class Text : IEquatable<Text>
                AddDate.Equals(other.AddDate) && 
                SourceLanguage.Equals(other.SourceLanguage) && 
                TargetLanguage.Equals(other.TargetLanguage) && 
-               Genres.Equals(other.Genres) && 
-               Sentences.Equals(other.Sentences) && 
+               Genres.SequenceEqual(other.Genres) && 
+               Sentences.SequenceEqual(other.Sentences) && 
                AddedBy.Equals(other.AddedBy);
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace Parcorpus.DataAccess.Models;
 
-public class SearchHistoryDbModel
+public class SearchHistoryDbModel : IEquatable<SearchHistoryDbModel>
 {
     public int SearchHistoryId { get; set; }
     
@@ -18,5 +18,27 @@ public class SearchHistoryDbModel
         UserId = userId;
         Query = query;
         QueryTimestampUtc = queryTimestampUtc;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(SearchHistoryDbModel? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+
+        return SearchHistoryId == other.SearchHistoryId &&
+               UserId.Equals(other.UserId) &&
+               Query.Equals(other.Query);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(SearchHistoryId, UserId, UserNavigation, Query, QueryTimestampUtc);
     }
 }

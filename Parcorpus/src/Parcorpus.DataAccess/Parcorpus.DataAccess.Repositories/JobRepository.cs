@@ -116,12 +116,6 @@ public class JobRepository : BaseRepository<JobRepository>, IJobRepository
 
             var result = await jobs.OrderByDescending(j => j.StartedTimeUtc).ToListAsync();
 
-            if (result is null)
-            {
-                Logger.LogError("Jobs of user id {userId} do not exist", userId);
-                throw new JobNotFoundException($"Jobs with user id {userId} do not exist");
-            }
-
             Logger.LogInformation("Successfully retrieved jobs of userId {userId}, count: {count}", userId,
                 result.Count);
 
@@ -129,10 +123,6 @@ public class JobRepository : BaseRepository<JobRepository>, IJobRepository
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
                 items: result.Select(JobConverter.ConvertDbModelToAppModel).ToList());
-        }
-        catch (JobNotFoundException)
-        {
-            throw;
         }
         catch (InvalidPagingException)
         {

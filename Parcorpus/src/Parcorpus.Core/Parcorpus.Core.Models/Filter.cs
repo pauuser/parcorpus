@@ -2,7 +2,7 @@
 
 namespace Parcorpus.Core.Models;
 
-public sealed class Filter
+public sealed class Filter : IEquatable<Filter>
 {
     public string? Genre { get; set; }
 
@@ -35,5 +35,28 @@ public sealed class Filter
         sb.Append($"Dates = [{StartDateTime}, {EndDateTime}]");
         
         return sb.ToString();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(Filter? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        
+        return Genre == other.Genre && 
+               Nullable.Equals(StartDateTime, other.StartDateTime) && 
+               Nullable.Equals(EndDateTime, other.EndDateTime) && 
+               Author == other.Author;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Genre, StartDateTime, EndDateTime, Author);
     }
 }

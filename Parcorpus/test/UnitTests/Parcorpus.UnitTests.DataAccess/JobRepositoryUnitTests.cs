@@ -181,6 +181,21 @@ public class JobRepositoryUnitTests
         Assert.Equal(expectedJobs, actualJobs);
     }
     
+    [Fact]
+    public async Task GetUserJobsExceptionTest()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        _context.Setup<DbSet<JobDbModel>>(s => s.Jobs)
+            .Throws<Exception>();
+
+        var paging = new PaginationParameters(pageNumber: null, pageSize: null);
+        
+        // Act & Assert
+        await Assert.ThrowsAsync<JobRepositoryException>(() => _jobRepository.GetUserJobs(userId, paging));
+    }
+    
     [Theory]
     [InlineData(1, 1)]
     [InlineData(1, 5)]
@@ -228,7 +243,7 @@ public class JobRepositoryUnitTests
 
         var paging = new PaginationParameters(pageNumber: pageNumber, pageSize: pageSize);
         
-        // Act
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidPagingException>(() => _jobRepository.GetUserJobs(userId, paging));
     }
 }

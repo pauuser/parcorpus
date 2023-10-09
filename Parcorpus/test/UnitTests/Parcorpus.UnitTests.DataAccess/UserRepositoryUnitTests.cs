@@ -331,6 +331,35 @@ public class UserRepositoryUnitTests
     }
     
     [Fact]
+    public async Task UpdateUserLanguageUserNotFoundTest()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        
+        var countryDb = CountryDbModelFactory.Create();
+        var languageDb = LanguageDbModelFactory.Create();
+        
+        var user = UserFactory.Create(userId: userId, countryName: countryDb.Name, 
+            language: new Language(languageDb.ShortName, languageDb.FullName));
+        var userDb = UserDbModelFactory.Create(user, countryDb.CountryId, languageDb.LanguageId);
+        userDb.CountryNavigation = countryDb;
+        userDb.NativeLanguageNavigation = languageDb;
+        
+        _context.Setup<DbSet<LanguageDbModel>>(s => s.Languages)
+            .ReturnsDbSet(new List<LanguageDbModel> { languageDb }.AsQueryable());
+        _context.Setup<DbSet<CountryDbModel>>(s => s.Countries)
+            .ReturnsDbSet(new List<CountryDbModel> { countryDb, CountryDbModelFactory.Create(2, "Oceania") }.AsQueryable());
+        _context.Setup<DbSet<UserDbModel>>(s => s.Users)
+            .ReturnsDbSet(new List<UserDbModel> {  }.AsQueryable());
+        
+        var expectedUpdatedUser = UserFactory.Create(userId: userId, countryName: "Oceania", 
+            language: new Language("fr", "French"));
+        
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => _userRepository.UpdateUser(expectedUpdatedUser));
+    }
+    
+    [Fact]
     public async Task UpdateUserCountryNotFoundTest()
     {
         // Arrange

@@ -1,6 +1,6 @@
 ﻿namespace Parcorpus.DB.Models;
 
-public class FilterDbModel
+public class FilterDbModel : IEquatable<FilterDbModel>
 {
     public string? Genre { get; set; }
 
@@ -23,5 +23,28 @@ public class FilterDbModel
 
     public FilterDbModel()
     {
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
+
+    public bool Equals(FilterDbModel? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        
+        return Genre == other.Genre && 
+               Nullable.Equals(StartDateTime, other.StartDateTime) && 
+               Nullable.Equals(EndDateTime, other.EndDateTime) && 
+               Author == other.Author;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Genre, StartDateTime, EndDateTime, Author);
     }
 }

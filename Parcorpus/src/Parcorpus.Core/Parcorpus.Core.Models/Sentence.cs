@@ -33,7 +33,7 @@ public sealed class Sentence : IEquatable<Sentence>
         return SentenceId == other.SentenceId && 
                SourceText == other.SourceText && 
                AlignedTranslation == other.AlignedTranslation && 
-               Words.Equals(other.Words);
+               Words.SequenceEqual(other.Words);
     }
 
     public override int GetHashCode()

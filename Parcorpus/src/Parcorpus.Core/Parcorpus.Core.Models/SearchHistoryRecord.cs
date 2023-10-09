@@ -44,14 +44,13 @@ public sealed class SearchHistoryRecord : IEquatable<SearchHistoryRecord>
             return false;
         if (ReferenceEquals(this, other)) 
             return true;
-        
-        return SearchHistoryId == other.SearchHistoryId && 
-               UserId.Equals(other.UserId) && 
-               Word == other.Word && 
-               SourceLanguageShortName == other.SourceLanguageShortName && 
-               DestinationLanguageShortName == other.DestinationLanguageShortName && 
-               Filters.Equals(other.Filters) && 
-               QueryTimestampUtc.Equals(other.QueryTimestampUtc);
+
+        return SearchHistoryId == other.SearchHistoryId &&
+               UserId.Equals(other.UserId) &&
+               Word == other.Word &&
+               SourceLanguageShortName == other.SourceLanguageShortName &&
+               DestinationLanguageShortName == other.DestinationLanguageShortName &&
+               Filters.Equals(other.Filters);
     }
 
     public override int GetHashCode()
