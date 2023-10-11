@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/KuriharaJun/pre-commit-hooks-dotnet-core
+    rev: v0.3
+    hooks:
+    -   id: dotnet-test
+        args: ["./Parcorpus/Parcorpus.sln"]
