@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Allure.Xunit.Attributes;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Exceptions;
@@ -11,6 +12,8 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 
+[AllureSuite("Services")]
+[AllureSubSuite("LanguageService")]
 public class LanguageServiceUnitTests
 {
     private readonly ILanguageService _languageService;

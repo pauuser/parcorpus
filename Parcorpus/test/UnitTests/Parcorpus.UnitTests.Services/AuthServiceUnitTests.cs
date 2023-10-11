@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Allure.Xunit.Attributes;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
@@ -14,6 +15,8 @@ using HashHelper = Parcorpus.UnitTests.Services.Helpers.HashHelper;
 
 namespace Parcorpus.UnitTests.Services;
 
+[AllureSuite("Services")]
+[AllureSubSuite("AuthService")]
 public class AuthServiceUnitTests
 {
     private readonly IAuthService _authService;

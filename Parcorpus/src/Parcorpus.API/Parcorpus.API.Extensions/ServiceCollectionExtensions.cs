@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Parcorpus.API.Controllers;
 using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Interfaces;
+using Parcorpus.DataAccess.Context.Managers;
 using Parcorpus.DataAccess.Repositories;
 using Parcorpus.Services.AnnotationService;
 using Parcorpus.Services.AnnotationService.SentenceAligner;
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddTransient<ICredentialsRepository, CredentialsRepository>();
         serviceCollection.AddTransient<ISearchHistoryRepository, SearchHistoryRepository>();
         serviceCollection.AddTransient<IJobRepository, JobRepository>();
+        serviceCollection.AddTransient<ITransactionManager, TransactionManager>();
 
         return serviceCollection;
     }

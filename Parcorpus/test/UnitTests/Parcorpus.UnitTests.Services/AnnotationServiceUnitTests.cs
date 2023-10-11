@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Allure.Xunit.Attributes;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Parcorpus.Core.Configuration;
 using Parcorpus.Core.Interfaces;
@@ -10,6 +11,8 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 
+[AllureSuite("Services")]
+[AllureSubSuite("AnnotationService")]
 public class AnnotationServiceUnitTests
 {
     private readonly IAnnotationService _annotationService;

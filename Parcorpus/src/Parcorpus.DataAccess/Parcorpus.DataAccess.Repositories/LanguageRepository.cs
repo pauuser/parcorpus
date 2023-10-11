@@ -17,16 +17,19 @@ namespace Parcorpus.DataAccess.Repositories;
 public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageRepository
 {
     private readonly ParcorpusDbContext _context;
+    private readonly ITransactionManager _transactionManager;
     private readonly IMemoryCache _cache;
     private readonly CacheConfiguration _cacheConfiguration;
 
     public LanguageRepository(ILogger<LanguageRepository> logger, 
         ParcorpusDbContext context,
+        ITransactionManager transactionManager,
         IMemoryCache cache,
         IOptions<CacheConfiguration> cacheConfiguration) : base(logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         _cacheConfiguration = cacheConfiguration.Value ?? throw new ArgumentNullException(nameof(cacheConfiguration));
     }
 
@@ -273,7 +276,7 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
 
     public async Task AddAlignedText(Guid userId, Text alignedText)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await using var transaction = await _transactionManager.BeginTransactionAsync();
         try
         {
             var sourceLanguage = alignedText.SourceLanguage;
@@ -281,9 +284,9 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
             var languagePair = await GetOrCreateLanguagePair(sourceLanguage, targetLanguage);
 
             var meta = await CreateMetaAnnotation(new MetaAnnotationDbModel(metaId: default,
-                title: alignedText.Title, 
-                author: alignedText.Author, 
-                source: alignedText.Source, 
+                title: alignedText.Title,
+                author: alignedText.Author,
+                source: alignedText.Source,
                 creationYear: alignedText.CreationYear,
                 addDate: DateTime.UtcNow));
             var text = await CreateText(userId, meta, languagePair);
@@ -291,9 +294,19 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
 
             await CreateSentences(sentences: alignedText.Sentences, text: text);
             await transaction.CommitAsync();
-            
+
             if (_cache.TryGetValue(userId, out _))
                 _cache.Remove(userId);
+        }
+        catch (InvalidLanguageException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+        catch (NotFoundException)
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
         catch (Exception ex)
         {
@@ -338,6 +351,10 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
 
             return languagePair;
         }
+        catch (InvalidLanguageException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error during getting or creating language pair");
@@ -375,19 +392,23 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                 throw new NotFoundException($"User with id = {userId} is not found");
             }
 
-            var added = await _context.Texts.AddAsync(new TextDbModel(textId: default, 
-                metaAnnotation: meta.MetaId, 
-                languagePair: languagePair.LanguagePairId, 
+            var added = await _context.Texts.AddAsync(new TextDbModel(textId: default,
+                metaAnnotation: meta.MetaId,
+                languagePair: languagePair.LanguagePairId,
                 addedBy: userId,
                 addedByNavigation: user,
                 languagePairNavigation: languagePair,
                 metaAnnotationNavigation: meta));
             var entity = added.Entity;
-            
+
             await _context.SaveChangesAsync();
             Logger.LogInformation("Text is created with id = {id}", entity.TextId);
 
             return entity;
+        }
+        catch (NotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

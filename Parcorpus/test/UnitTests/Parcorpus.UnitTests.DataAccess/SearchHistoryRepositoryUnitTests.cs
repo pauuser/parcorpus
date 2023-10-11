@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Allure.Xunit.Attributes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.EntityFrameworkCore;
@@ -14,6 +15,8 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.DataAccess;
 
+[AllureSuite("Repositories")]
+[AllureSubSuite("SearchHistoryRepository")]
 public class SearchHistoryRepositoryUnitTests
 {
     private readonly ISearchHistoryRepository _searchHistoryRepository;

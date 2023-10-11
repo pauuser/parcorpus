@@ -19,6 +19,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
       <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Exceptions\Parcorpus.Core.Exceptions.csproj" />
+      <ProjectReference Include="..\..\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
       <ProjectReference Include="..\Parcorpus.DataAccess.Models\Parcorpus.DataAccess.Models.csproj" />
     </ItemGroup>
 

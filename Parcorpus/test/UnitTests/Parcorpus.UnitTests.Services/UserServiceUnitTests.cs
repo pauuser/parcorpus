@@ -1,4 +1,5 @@
 ﻿using System.Net.Mail;
+using Allure.Xunit.Attributes;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Parcorpus.Core.Configuration;
@@ -12,6 +13,8 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 
+[AllureSuite("Services")]
+[AllureSubSuite("UserService")]
 public class UserServiceUnitTests
 {
     private readonly IUserService _userService;

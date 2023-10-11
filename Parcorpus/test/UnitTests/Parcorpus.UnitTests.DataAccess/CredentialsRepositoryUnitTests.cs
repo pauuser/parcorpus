@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Allure.Xunit.Attributes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -16,6 +17,8 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.DataAccess;
 
+[AllureSuite("Repositories")]
+[AllureSubSuite("CredentialsRepository")]
 public class CredentialsRepositoryUnitTests
 {
     private readonly ICredentialsRepository _credentialsRepository;

@@ -10,8 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Allure.XUnit" Version="2.10.0-preview.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0"/>
         <PackageReference Include="Moq" Version="4.20.69" />
+        <PackageReference Include="Moq.EntityFrameworkCore" Version="7.0.0.2" />
         <PackageReference Include="xunit" Version="2.4.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,6 +28,8 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Interfaces\Parcorpus.Core.Interfaces.csproj" />
+      <ProjectReference Include="..\..\..\src\Parcorpus.DataAccess\Parcorpus.DataAccess.Context\Parcorpus.DataAccess.Context.csproj" />
+      <ProjectReference Include="..\..\..\src\Parcorpus.DataAccess\Parcorpus.DataAccess.Repositories\Parcorpus.DataAccess.Repositories.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.AnnotationService\Parcorpus.Services.AnnotationService.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.AuthService\Parcorpus.Services.AuthService.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Services\Parcorpus.Services.JobService\Parcorpus.Services.JobService.csproj" />
@@ -44,10 +48,10 @@
       <Reference Include="Microsoft.AspNetCore.Mvc.Core" />
     </ItemGroup>
 
-
-
-
-
-
-
+    <ItemGroup>
+        <Content Include="..\Parcorpus.UnitTests.Common\AllureConfiguration\allureConfig.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    
 </Project>
