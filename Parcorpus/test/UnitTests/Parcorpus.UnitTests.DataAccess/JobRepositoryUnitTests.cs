@@ -71,7 +71,7 @@ public class JobRepositoryUnitTests
         // Arrange
         var jobId = Guid.NewGuid();
         var jobDbModel = JobDbModelFactory.Create(jobId: jobId);
-        var expectedJob1 = JobFactory.Create(jobDbModel);
+        var expectedJob = JobFactory.Create(jobDbModel);
 
         _context.Setup<DbSet<JobDbModel>>(s => s.Jobs)
             .ReturnsDbSet(new List<JobDbModel> { jobDbModel });
@@ -80,7 +80,7 @@ public class JobRepositoryUnitTests
         var actualJob = await _jobRepository.GetJobById(jobId);
 
         // Assert
-        Assert.Equal(expectedJob1, actualJob);
+        Assert.Equal(expectedJob, actualJob);
     }
     
     [Fact]
