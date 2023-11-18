@@ -1,13 +1,14 @@
 version: '3.7'
 
 volumes:
-    postgres:
+    postgres2:
     certs:
       driver: local
     esdata01:
       driver: local
     kibanadata:
       driver: local
+    postgres1:
 
 networks:
   backend-network:
@@ -17,21 +18,50 @@ networks:
     external: false
 
 services:
-  postgres:
-    container_name: postgres
-    image: postgres
+  postgres-1:
+    container_name: postgres-1
+    image: 'bitnami/postgresql:latest'
     environment:
       POSTGRES_DB: parcorpusdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      PGDATA: /data/postgres
+      POSTGRESQL_REPLICATION_MODE: master
+      POSTGRESQL_REPLICATION_USER: postgres
+      POSTGRESQL_REPLICATION_PASSWORD: postgres
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: parcorpusdb
     volumes:
-      - 'postgres:/data/postgres'
+      - 'postgres1:/bitnami/postgresql'
+      - './Parcorpus/scripts/roles.sql:/docker-entrypoint-initdb.d/roles.sql'
     ports:
       - "5434:5432"
+    networks:
+      - backend-network
+  
+  postgres-2:
+    container_name: postgres-2
+    image: 'bitnami/postgresql:latest'
+    environment:
+      POSTGRES_DB: parcorpusdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_REPLICATION_USER: postgres
+      POSTGRESQL_REPLICATION_PASSWORD: postgres
+      POSTGRESQL_MASTER_HOST: postgres-1
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_MASTER_PORT_NUMBER: 5432
+    volumes:
+      - 'postgres2:/bitnami/postgresql'
+      - './Parcorpus/scripts/roles.sql:/docker-entrypoint-initdb.d/roles.sql'
+    ports:
+      - "5436:5432"
     restart: unless-stopped
     networks:
       - backend-network
+    depends_on:
+      - postgres-1
   
   rabbitmq:
     image: rabbitmq:3.10.7-management
@@ -46,6 +76,8 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
+    networks:
+      - backend-network
 
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
@@ -90,7 +122,7 @@ services:
   
   grafana:
     depends_on:
-      - postgres
+      - postgres-1
     image: grafana/grafana-enterprise
     container_name: grafana
     restart: unless-stopped
@@ -102,7 +134,7 @@ services:
     networks:
       - backend-network
   
-  backend:
+  backend-main:
     container_name: parcorpus-backend
     build: './Parcorpus/'
     restart: always
@@ -111,12 +143,13 @@ services:
       - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING}
       - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
       - ELASTIC_URL=${ELASTIC_URL}
+      - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
     volumes:
       - './Parcorpus/src/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
       - './Parcorpus/src/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
       - './Parcorpus/src/Parcorpus.API/logs:/app/log'
     depends_on:
-      - postgres
+      - postgres-1
       - es01 
       - grafana
       - kibana
@@ -127,6 +160,90 @@ services:
     ports:
       - 446:443
       - 802:80
+
+  backend-mirror:
+    container_name: parcorpus-mirror
+    build: './Parcorpus/'
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnectionString=${MIRROR_DB_CONNECTION_STRING}
+      - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
+    volumes:
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
+      - './Parcorpus/src/Parcorpus.API/logs:/app/log'
+    depends_on:
+      - postgres-1
+      - postgres-2
+      - es01 
+      - grafana
+      - kibana
+      - aligner
+      - rabbitmq
+    networks:
+      - backend-network
+    ports:
+      - 450:443
+      - 850:80
+
+  backend-read-only-1:
+    build: './Parcorpus/'
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING_READ_ONLY}
+      - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
+    volumes:
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
+      - './Parcorpus/src/Parcorpus.API/logs:/app/log'
+    depends_on:
+      - postgres-1
+      - es01 
+      - grafana
+      - kibana
+      - aligner
+      - rabbitmq
+      - backend-main
+      - backend-mirror
+    networks:
+      - backend-network
+    ports:
+      - 447:443
+      - 803:80
+  
+  backend-read-only-2:
+    build: './Parcorpus/'
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING_READ_ONLY}
+      - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
+    volumes:
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
+      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
+      - './Parcorpus/src/Parcorpus.API/logs:/app/log'
+    depends_on:
+      - postgres-1
+      - es01 
+      - grafana
+      - kibana
+      - aligner
+      - rabbitmq
+      - backend-main
+      - backend-mirror
+    networks:
+      - backend-network
+    ports:
+      - 448:443
+      - 804:80
   
   aligner:
     build: ./Parcorpus/src/Parcorpus.Services/Parcorpus.Services.AnnotationService/WordAlignerServer
@@ -136,3 +253,35 @@ services:
       - backend-network
     ports:
       - 50051:50051
+  
+  nginx:
+    image: byjg/nginx-extras
+    volumes:
+      - ./logs:/var/log/nginx #log файлы.
+      - ./nginx.conf:/etc/nginx/nginx.conf #Конфигурация nginx.
+      - ./static:/static
+      - ./docs:/docs
+    working_dir: /parcorpus
+    ports:
+      - "80:80"
+      - "443:443"
+    restart:
+      always
+    networks:
+      - backend-network
+  
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - ./pgadmin:/var/lib/pgadmin
+       - ./pgadmin_extra_servers.conf:/pgadmin_extra_servers.conf
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - backend-network
+    restart: unless-stopped

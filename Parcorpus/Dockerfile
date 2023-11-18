@@ -23,7 +23,7 @@ COPY . .
 ARG CONFIGURATION
 RUN echo ${CONFIGURATION}
 
-WORKDIR /src/Parcorpus.API/Parcorpus.API
+WORKDIR /src/src/Parcorpus.API/Parcorpus.API
 RUN dotnet build "Parcorpus.API.csproj" -c "$CONFIGURATION" -o /app/build 
 
 FROM build AS publish
