@@ -74,4 +74,9 @@ public class UserDto
         CountryName = countryName;
         NativeLanguageShortName = nativeLanguageShortName;
     }
+
+    /// <summary>
+    /// Parameterless constructor
+    /// </summary>
+    public UserDto() { }
 }

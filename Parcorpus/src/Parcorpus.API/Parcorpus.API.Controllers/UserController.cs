@@ -47,6 +47,7 @@ public class UserController : ControllerBase
     /// <response code="200">OK. User returned.</response>
     /// <response code="401">Unauthorized.</response>
     /// <response code="500">Internal server error.</response>
+    [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -75,6 +76,7 @@ public class UserController : ControllerBase
     /// <response code="400">Bad request.</response>
     /// <response code="401">Unauthorized.</response>
     /// <response code="500">Internal server error.</response>
+    [Authorize]
     [HttpPatch("me")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -178,6 +180,7 @@ public class UserController : ControllerBase
     /// <response code="401">Unauthorized.</response>
     /// <response code="404">User not found.</response>
     /// <response code="500">Internal server error.</response>
+    [Authorize]
     [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

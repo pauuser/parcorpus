@@ -102,4 +102,8 @@ public class ConcordanceDto
         CreationYear = creationYear;
         AddDate = addDate;
     }
+
+    public ConcordanceDto()
+    {
+    }
 }

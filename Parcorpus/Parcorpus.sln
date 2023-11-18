@@ -62,6 +62,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.DataAcc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.Common", "test\UnitTests\Parcorpus.UnitTests.Common\Parcorpus.UnitTests.Common.csproj", "{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{FB60F8C6-5BC2-420E-8EF3-04C4C2FED135}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.IntegrationTests", "test\IntegrationTests\Parcorpus.IntegrationTests\Parcorpus.IntegrationTests.csproj", "{D3599ADA-FB7C-485F-B0C0-6B7C3B476243}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "E2ETests", "E2ETests", "{FD2EB500-A1A4-4AF9-A537-59CB1AE958F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.E2ETests", "test\E2ETests\Parcorpus.E2ETests\Parcorpus.E2ETests.csproj", "{8A651BB9-CDD3-49D5-9CE9-B2466A7D3F82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.Services", "test\UnitTests\Parcorpus.UnitTests.Services\Parcorpus.UnitTests.Services.csproj", "{3A448831-6439-4A83-886A-F66B8D1F37CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.DataAccess", "test\UnitTests\Parcorpus.UnitTests.DataAccess\Parcorpus.UnitTests.DataAccess.csproj", "{6E60973C-C4A3-4CDE-BBB7-F2DED44D2B7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parcorpus.UnitTests.Common", "test\UnitTests\Parcorpus.UnitTests.Common\Parcorpus.UnitTests.Common.csproj", "{C3361DFE-03DC-4DAA-9BF6-31CAFAEFCF79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

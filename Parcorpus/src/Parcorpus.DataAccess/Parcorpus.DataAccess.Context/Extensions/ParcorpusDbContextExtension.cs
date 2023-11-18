@@ -11,13 +11,14 @@ public static class ParcorpusDbContextExtension
     {
         serviceCollection.AddOptions<CacheConfiguration>()
             .BindConfiguration(CacheConfiguration.ConfigurationSectionName);
-        
-        serviceCollection.AddDbContext<ParcorpusDbContext>(options => options.UseNpgsql(connectionString))
-            .Migrate<ParcorpusDbContext>();
+
+        serviceCollection.AddDbContext<ParcorpusDbContext>(options => options.UseNpgsql(connectionString));
         
         serviceCollection.AddMemoryCache();
         
         serviceCollection.AddHostedService<DbContextStartupBackgroundTask>();
+        
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         
         return serviceCollection;
     }

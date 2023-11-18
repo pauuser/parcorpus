@@ -4,7 +4,7 @@ namespace Parcorpus.UnitTests.Common.Factories.DbModels;
 
 public static class MetaGenreDbModelFactory
 {
-    public static MetaGenreDbModel Create(int mgId = 1, int metaId = 1, int genreId = 1)
+    public static MetaGenreDbModel Create(int mgId = default, int metaId = 1, int genreId = 1)
     {
         return new MetaGenreDbModel(mgId, metaId, genreId);
     }

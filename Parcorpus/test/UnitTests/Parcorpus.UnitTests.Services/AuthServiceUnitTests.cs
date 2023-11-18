@@ -15,6 +15,9 @@ using HashHelper = Parcorpus.UnitTests.Services.Helpers.HashHelper;
 
 namespace Parcorpus.UnitTests.Services;
 
+[TestCaseOrderer(
+    ordererTypeName: "Parcorpus.UnitTests.Common.Orderers.RandomOrderer",
+    ordererAssemblyName: "Parcorpus.UnitTests.Common")]
 [AllureSuite("Services")]
 [AllureSubSuite("AuthService")]
 public class AuthServiceUnitTests

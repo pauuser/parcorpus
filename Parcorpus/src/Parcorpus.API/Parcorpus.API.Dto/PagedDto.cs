@@ -25,4 +25,8 @@ public sealed class PagedDto<T>
         PageInfo = pageInfo;
         Items = items;
     }
+
+    public PagedDto()
+    {
+    }
 }

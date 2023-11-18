@@ -4,7 +4,7 @@ namespace Parcorpus.UnitTests.Common.Factories.DbModels;
 
 public static class MetaAnnotationDbModelFactory
 {
-    public static MetaAnnotationDbModel Create(int metaId = 1, 
+    public static MetaAnnotationDbModel Create(int metaId = default, 
         string title = "Title", 
         string author = "Author", 
         string source = "Source", 

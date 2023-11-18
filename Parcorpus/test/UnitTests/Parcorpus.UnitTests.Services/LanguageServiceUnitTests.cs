@@ -12,6 +12,9 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.Services;
 
+[TestCaseOrderer(
+    ordererTypeName: "Parcorpus.UnitTests.Common.Orderers.RandomOrderer",
+    ordererAssemblyName: "Parcorpus.UnitTests.Common")]
 [AllureSuite("Services")]
 [AllureSubSuite("LanguageService")]
 public class LanguageServiceUnitTests

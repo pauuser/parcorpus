@@ -1,15 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Parcorpus.DataAccess.Context.Extensions;
 
 public static class MigrationExtension
 {
-    public static IServiceCollection Migrate<TContext>(this IServiceCollection serviceCollection) where TContext : DbContext
+    public static IApplicationBuilder Migrate<TContext>(this IApplicationBuilder builder) where TContext : DbContext
     {
-        var context = serviceCollection.BuildServiceProvider().GetRequiredService<TContext>();
+        var scope = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        
+        var context = scope.ServiceProvider.GetRequiredService<TContext>();
         context.Database.Migrate();
 
-        return serviceCollection;
+        return builder;
     }
 }

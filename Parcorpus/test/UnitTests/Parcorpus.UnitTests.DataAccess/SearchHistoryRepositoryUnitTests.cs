@@ -15,6 +15,9 @@ using Parcorpus.UnitTests.Common.Helpers;
 
 namespace Parcorpus.UnitTests.DataAccess;
 
+[TestCaseOrderer(
+    ordererTypeName: "Parcorpus.UnitTests.Common.Orderers.RandomOrderer",
+    ordererAssemblyName: "Parcorpus.UnitTests.Common")]
 [AllureSuite("Repositories")]
 [AllureSubSuite("SearchHistoryRepository")]
 public class SearchHistoryRepositoryUnitTests

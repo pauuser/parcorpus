@@ -18,12 +18,14 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0"/>
         <PackageReference Include="Moq" Version="4.20.69" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
+        <PackageReference Include="xunit.extensibility.core" Version="2.4.2" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Configuration\Parcorpus.Core.Configuration.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.Core\Parcorpus.Core.Models\Parcorpus.Core.Models.csproj" />
       <ProjectReference Include="..\..\..\src\Parcorpus.DataAccess\Parcorpus.DataAccess.Models\Parcorpus.DataAccess.Models.csproj" />
+
     </ItemGroup>
 
 

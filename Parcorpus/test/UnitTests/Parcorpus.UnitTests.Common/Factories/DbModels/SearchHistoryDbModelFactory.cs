@@ -20,7 +20,7 @@ public static class SearchHistoryDbModelFactory
             queryTimestampUtc: history.QueryTimestampUtc);
     }
     
-    public static SearchHistoryDbModel Create(int searchHistoryId = 1, 
+    public static SearchHistoryDbModel Create(int searchHistoryId = default, 
         Guid? userId = null, 
         HistoryJsonDbModel? query = null, 
         DateTime? queryTimestampUtc = null)

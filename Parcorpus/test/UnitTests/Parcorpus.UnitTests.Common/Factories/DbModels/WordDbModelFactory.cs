@@ -4,7 +4,7 @@ namespace Parcorpus.UnitTests.Common.Factories.DbModels;
 
 public static class WordDbModelFactory
 {
-    public static WordDbModel Create(int wordId = 1, 
+    public static WordDbModel Create(int wordId = default, 
         string sourceWord = "", 
         string alignedWord = "", 
         int sentence = 1,

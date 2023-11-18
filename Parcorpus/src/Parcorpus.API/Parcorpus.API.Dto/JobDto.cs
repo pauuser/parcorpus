@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Newtonsoft.Json.Converters;
 using Parcorpus.API.Dto.Enums;
 
 namespace Parcorpus.API.Dto;

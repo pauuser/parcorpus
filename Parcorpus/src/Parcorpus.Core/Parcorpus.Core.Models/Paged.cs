@@ -16,8 +16,8 @@ public class Paged<T> : IEquatable<Paged<T>>
     {
         pageNumber ??= 1;
         pageSize ??= totalCount;
-        var totalPages = totalCount / pageSize.Value;
-        if (totalCount % pageSize.Value != 0)
+        var totalPages = pageSize == 0 ? 0 : totalCount / pageSize.Value;
+        if (pageSize != 0 && totalCount % pageSize.Value != 0)
             totalPages++;
         
         PageNumber = pageNumber.Value;
@@ -25,6 +25,10 @@ public class Paged<T> : IEquatable<Paged<T>>
         TotalPages = totalPages;
         TotalCount = totalCount;
         Items = items;
+    }
+
+    public Paged()
+    {
     }
 
     public override bool Equals(object? obj)

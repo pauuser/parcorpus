@@ -4,7 +4,7 @@ namespace Parcorpus.UnitTests.Common.Factories.DbModels;
 
 public static class SentenceDbModelFactory
 {
-    public static SentenceDbModel Create(int sentenceId = 1, 
+    public static SentenceDbModel Create(int sentenceId = default, 
         string sourceText = "apple", 
         string alignedTranslation = "яблоко", 
         int sourceTextId = 1)
