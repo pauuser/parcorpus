@@ -38,7 +38,7 @@ jobs:
     - name: Build
       run: |
         cd ./Parcorpus
-        dotnet build --no-restore
+        dotnet publish
     - name: Test
       run: |
         cd ./Parcorpus
