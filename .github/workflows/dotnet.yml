@@ -28,18 +28,8 @@ jobs:
       run: |
         cd ./Parcorpus
         dotnet build --no-restore
-  
-  test:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: |
-        cd ./Parcorpus
-        dotnet publish
     - name: Test
       run: |
         cd ./Parcorpus
         dotnet test --no-build --verbosity normal
+    
