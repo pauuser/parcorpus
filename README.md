@@ -28,6 +28,7 @@ Contrary to most of the research suggesting storing the corpus as a set of XML f
 - [xUnit](https://xunit.net/), [Testcontainers](https://testcontainers.com/), [Respawn](https://github.com/jbogard/Respawn) and [FlueFlame](https://isbronny.github.io/FlueFlame/) for tests
 - NGINX
 - RabbitMQ
+- Python & gRPC
 
 ## Documentation
 
