@@ -31,8 +31,8 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
             }
 
             var existingHistory = (await _context.SearchHistory
-                .Where(h => h.UserId == userId)
-                .ToListAsync())
+                    .Where(h => h.UserId == userId)
+                    .ToListAsync())
                 .MaxBy(h => h.QueryTimestampUtc);
             if (existingHistory?.Query.Word == query.SourceWord.WordForm)
             {

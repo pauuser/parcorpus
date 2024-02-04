@@ -28,6 +28,13 @@ jobs:
       run: |
         cd ./Parcorpus
         dotnet build --no-restore
+  
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
     - name: Test
       run: |
         cd ./Parcorpus
