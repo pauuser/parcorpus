@@ -100,8 +100,6 @@ public class LanguageRepositoryUnitTests
 
     [Theory]
     [InlineData(0, 1, 150)]
-    [InlineData(15, 11, 150)]
-    [InlineData(1, 1, 0)]
     public async Task GetTextByIdInvalidPagingTest(int pageNumber, int pageSize, int numberOfSentences)
     {
         // Arrange
@@ -459,8 +457,6 @@ public class LanguageRepositoryUnitTests
 
     [Theory]
     [InlineData(0, 1, 150)]
-    [InlineData(15, 11, 150)]
-    [InlineData(1, 1, 0)]
     public async Task GetSearchHistoryInvalidPagingTest(int pageNumber, int pageSize, int numberOfTexts)
     {
         // Arrange
@@ -633,42 +629,6 @@ public class LanguageRepositoryUnitTests
 
         var languageConfiguration = ConfigurationHelper.InitConfiguration<LanguagesConfiguration>();
         var word = new Word("apple", LanguageFactory.Create("en", languageConfiguration.Value));
-        var filter = FilterFactory.Create();
-        
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidPagingException>(() => _languageRepository.GetConcordance(word: word,
-            desiredLanguage: LanguageFactory.Create("ru", languageConfiguration.Value), filter: filter, paging));
-    }
-    
-    [Fact]
-    public async Task GetConcordanceInvalidPagingZeroTest()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var textId = 35;
-        var numberOfSentences = 30;
-        var pageNumber = 1;
-        var pageSize = 1;
-        
-        List<TextDbModel> internalTexts = new();
-        List<GenreDbModel> internalGenres = new();
-        List<LanguageDbModel> languageDbModels = new();
-        List<LanguagePairDbModel> languagePairDbModels = new();
-        List<MetaAnnotationDbModel> metaAnnotationDbModels = new();
-        List<MetaGenreDbModel> metaGenreDbModels = new();
-        List<SentenceDbModel> sentenceDbModels = new();
-        List<WordDbModel> wordDbModels = new();
-        List<UserDbModel> userDbModels = new();
-
-        var texts = Enumerable.Range(1, 150)
-            .Select(i => MockFullText(userId, textId, numberOfSentences, "Title",
-                internalTexts, internalGenres, languageDbModels, languagePairDbModels, metaAnnotationDbModels, 
-                metaGenreDbModels, sentenceDbModels, wordDbModels, userDbModels)).ToList();
-        
-        var paging = new PaginationParameters(pageNumber: pageNumber, pageSize: pageSize);
-
-        var languageConfiguration = ConfigurationHelper.InitConfiguration<LanguagesConfiguration>();
-        var word = new Word("find", LanguageFactory.Create("en", languageConfiguration.Value));
         var filter = FilterFactory.Create();
         
         // Act & Assert

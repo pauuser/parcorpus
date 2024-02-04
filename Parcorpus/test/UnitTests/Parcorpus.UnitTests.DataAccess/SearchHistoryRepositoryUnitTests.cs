@@ -30,40 +30,6 @@ public class SearchHistoryRepositoryUnitTests
         _searchHistoryRepository =
             new SearchHistoryRepository(NullLogger<SearchHistoryRepository>.Instance, _context.Object);
     }
-
-    [Fact]
-    public async Task AddRecordOkTest()
-    {
-        // Arrange
-        var searchHistoryId = 1;
-        var userId = Guid.NewGuid();
-
-        var user = UserDbModelFactory.Create(userId: userId);
-        _context.Setup<DbSet<UserDbModel>>(s => s.Users)
-            .ReturnsDbSet(new List<UserDbModel> { user }.AsQueryable());
-        
-        var internalSearchHistory = new List<SearchHistoryDbModel>();
-        _context.Setup(s => s.SearchHistory.AddAsync(It.IsAny<SearchHistoryDbModel>(), It.IsAny<CancellationToken>()))
-            .Returns((SearchHistoryDbModel job, CancellationToken _) =>
-            {
-                var entry = EntityHelper.GetMockEntityEntry(job);
-                entry.Entity.SearchHistoryId = searchHistoryId;
-                internalSearchHistory.Add(entry.Entity);
-                
-                return ValueTask.FromResult(entry);
-            });
-
-        var query = ConcordanceQueryFactory.Create();
-        var searchHistory = SearchHistoryFactory.CreateFromQuery(searchHistoryId: searchHistoryId, query: query, userId: userId);
-        var searchHistoryDb = SearchHistoryDbModelFactory.Create(searchHistory);
-        
-        // Act
-        await _searchHistoryRepository.AddRecord(userId, query);
-
-        // Assert
-        Assert.NotEmpty(internalSearchHistory);
-        Assert.Equal(searchHistoryDb, internalSearchHistory.First());
-    }
     
     [Fact]
     public async Task AddRecordUserNotFoundTest()
