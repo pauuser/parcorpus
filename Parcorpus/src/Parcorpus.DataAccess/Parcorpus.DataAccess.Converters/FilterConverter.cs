@@ -7,11 +7,11 @@ public static class FilterConverter
 {
     public static FilterDbModel ConvertAppModelToDbModel(Filter filter)
     {
-        return new FilterDbModel(filter?.Genre, filter?.StartDateTime, filter?.EndDateTime, filter?.Author);
+        return new FilterDbModel(filter?.Genre, filter?.StartYear, filter?.EndYear, filter?.Author);
     }
     
     public static Filter ConvertDbModelToAppModel(FilterDbModel filter)
     {
-        return new Filter(filter?.Genre, filter?.StartDateTime, filter?.EndDateTime, filter?.Author);
+        return new Filter(filter?.Genre, filter?.StartYear, filter?.EndYear, filter?.Author);
     }
 }

@@ -6,20 +6,20 @@ public sealed class Filter : IEquatable<Filter>
 {
     public string? Genre { get; set; }
 
-    public DateTime? StartDateTime { get; set; }
+    public int? StartYear { get; set; }
     
-    public DateTime? EndDateTime { get; set; }
+    public int? EndYear { get; set; }
     
     public string? Author { get; set; }
 
     public Filter(string? genre, 
-        DateTime? startDateTime, 
-        DateTime? endDateTime, 
+        int? startYear, 
+        int? endYear, 
         string? author)
     {
         Genre = genre;
-        StartDateTime = startDateTime;
-        EndDateTime = endDateTime;
+        StartYear = startYear;
+        EndYear = endYear;
         Author = author;
     }
 
@@ -32,7 +32,7 @@ public sealed class Filter : IEquatable<Filter>
         var sb = new StringBuilder();
         sb.Append($"Genre = {Genre};");
         sb.Append($"Author = {Author};");
-        sb.Append($"Dates = [{StartDateTime}, {EndDateTime}]");
+        sb.Append($"Dates = [{StartYear}, {EndYear}]");
         
         return sb.ToString();
     }
@@ -50,13 +50,13 @@ public sealed class Filter : IEquatable<Filter>
             return true;
         
         return Genre == other.Genre && 
-               Nullable.Equals(StartDateTime, other.StartDateTime) && 
-               Nullable.Equals(EndDateTime, other.EndDateTime) && 
+               Nullable.Equals(StartYear, other.EndYear) && 
+               Nullable.Equals(StartYear, other.EndYear) && 
                Author == other.Author;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Genre, StartDateTime, EndDateTime, Author);
+        return HashCode.Combine(Genre, StartYear, EndYear, Author);
     }
 }

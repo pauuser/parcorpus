@@ -19,11 +19,11 @@ public static class IQueryableExtensions
             result = result.Where(w => w.SentenceNavigation.TextNavigation.MetaAnnotationNavigation
                 .MetaGenresNavigation.Any(g => g.GenreNavigation.Name == filter.Genre));
         
-        if (FilterPresent(filter.StartDateTime) && FilterPresent(filter.EndDateTime))
+        if (FilterPresent(filter.StartYear) && FilterPresent(filter.EndYear))
         {
             result = result.Where(w =>
-                filter.StartDateTime < new DateTime(w.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.CreationYear, 6, 15) &&
-                new DateTime(w.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.CreationYear) < filter.EndDateTime);
+                filter.StartYear < w.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.CreationYear &&
+                w.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.CreationYear < filter.EndYear);
         }
 
         return result;

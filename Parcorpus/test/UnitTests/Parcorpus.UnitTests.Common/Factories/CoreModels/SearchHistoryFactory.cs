@@ -50,6 +50,6 @@ public static class SearchHistoryFactory
     
     private static Filter ConvertFilter(FilterDbModel filter)
     {
-        return new Filter(filter?.Genre, filter?.StartDateTime, filter?.EndDateTime, filter?.Author);
+        return new Filter(filter?.Genre, filter?.StartYear, filter?.EndYear, filter?.Author);
     }
 }

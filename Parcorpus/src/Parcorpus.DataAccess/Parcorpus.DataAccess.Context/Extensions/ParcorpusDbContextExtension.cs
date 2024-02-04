@@ -12,7 +12,8 @@ public static class ParcorpusDbContextExtension
         serviceCollection.AddOptions<CacheConfiguration>()
             .BindConfiguration(CacheConfiguration.ConfigurationSectionName);
 
-        serviceCollection.AddDbContext<ParcorpusDbContext>(options => options.UseNpgsql(connectionString));
+        serviceCollection.AddDbContext<ParcorpusDbContext>(opt => opt.UseNpgsql(connectionString, 
+            options => options.EnableRetryOnFailure()));
         
         serviceCollection.AddMemoryCache();
         

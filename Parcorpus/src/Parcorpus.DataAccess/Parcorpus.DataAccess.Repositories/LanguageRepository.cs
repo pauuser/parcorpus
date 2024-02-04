@@ -68,10 +68,11 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                 .Include(w => w.SentenceNavigation)
                     .ThenInclude(s => s.TextNavigation)
                         .ThenInclude(t => t.AddedByNavigation);
+                
 
-            var filtered = concordance.ApplyFilters(filter);
+            var filtered = concordance.ApplyFilters(filter).OrderByDescending(r => r.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.AddDate);
             var totalCount = await filtered.CountAsync();
-            if (paging.Specified)
+            if (paging.Specified && totalCount > 0)
             {
                 if (paging.OutOfRange(totalCount))
                 {
@@ -83,7 +84,8 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
 
                 filtered = filtered
                     .Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
-                    .Take(paging.PageSize.Value);
+                    .Take(paging.PageSize.Value)
+                    .OrderByDescending(r => r.SentenceNavigation.TextNavigation.MetaAnnotationNavigation.AddDate);
             }
 
             var queried = await filtered.ToListAsync();
@@ -116,7 +118,7 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
         var sb = new StringBuilder();
 
         sb.AppendJoin("_", word.WordForm, word.Language.ShortName, desiredLanguage.ShortName,
-            filter.Author, filter.StartDateTime, filter.EndDateTime, filter.Genre, paging.PageNumber, paging.PageSize);
+            filter.Author, filter.StartYear, filter.EndYear, filter.Genre, paging.PageNumber, paging.PageSize);
 
         return sb.ToString();
     }
@@ -165,7 +167,7 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
             var totalCount = await sentences.CountAsync();
 
             var queryableSentences = sentences.Where(_ => true);
-            if (paging.Specified)
+            if (paging.Specified && totalCount > 0)
             {
                 if (paging.OutOfRange(totalCount))
                 {
@@ -234,7 +236,7 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
             var totalCount = await texts.CountAsync();
 
             var paged = texts.Where(_ => true);
-            if (paging.Specified)
+            if (paging.Specified && totalCount > 0)
             {
                 if (paging.OutOfRange(totalCount))
                 {
@@ -258,8 +260,12 @@ public class LanguageRepository : BaseRepository<LanguageRepository>, ILanguageR
                 pageSize: paging.PageSize,
                 totalCount: totalCount,
                 items: converted);
-            _cache.Set(cacheKey, pagedResult);
-            Logger.LogInformation("New value for cache key {cacheKey} was set", cacheKey);
+            
+            if (converted.Any())
+            {
+                _cache.Set(cacheKey, pagedResult);
+                Logger.LogInformation("New value for cache key {cacheKey} was set", cacheKey);
+            }
 
             return pagedResult;
         }

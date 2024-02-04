@@ -9,6 +9,7 @@ volumes:
     kibanadata:
       driver: local
     postgres1:
+    frontend:
 
 networks:
   backend-network:
@@ -78,61 +79,6 @@ services:
       - 5672:5672
     networks:
       - backend-network
-
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-    labels:
-      co.elastic.logs/module: elasticsearch
-    volumes:
-      - esdata01:/usr/share/elasticsearch/data
-    ports:
-      - ${ES_PORT}:9200
-    environment:
-      - node.name=es01
-      - cluster.name=${CLUSTER_NAME}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=true
-      - xpack.license.self_generated.type=${LICENSE}
-    mem_limit: ${ES_MEM_LIMIT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-
-  kibana:
-    depends_on:
-      - es01
-    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
-    labels:
-      co.elastic.logs/module: kibana
-    volumes:
-      - kibanadata:/usr/share/kibana/data
-    ports:
-      - ${KIBANA_PORT}:5601
-    environment:
-      - ELASTICSEARCH_HOSTS=http://es01:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-    mem_limit: ${KB_MEM_LIMIT}
-  
-  grafana:
-    depends_on:
-      - postgres-1
-    image: grafana/grafana-enterprise
-    container_name: grafana
-    restart: unless-stopped
-    user: '0'
-    ports:
-      - '3000:3000'
-    volumes:
-      - '/data:/var/lib/grafana'
-    networks:
-      - backend-network
   
   backend-main:
     container_name: parcorpus-backend
@@ -150,9 +96,6 @@ services:
       - './Parcorpus/src/Parcorpus.API/logs:/app/log'
     depends_on:
       - postgres-1
-      - es01 
-      - grafana
-      - kibana
       - aligner
       - rabbitmq
     networks:
@@ -161,40 +104,12 @@ services:
       - 446:443
       - 802:80
 
-  backend-mirror:
-    container_name: parcorpus-mirror
-    build: './Parcorpus/'
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DbConnectionString=${MIRROR_DB_CONNECTION_STRING}
-      - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
-      - ELASTIC_URL=${ELASTIC_URL}
-      - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
-    volumes:
-      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/appsettings.json:/app/appsettings.json'
-      - './Parcorpus/src/Parcorpus.API/Parcorpus.API/NLog.config:/app/NLog.config'
-      - './Parcorpus/src/Parcorpus.API/logs:/app/log'
-    depends_on:
-      - postgres-1
-      - postgres-2
-      - es01 
-      - grafana
-      - kibana
-      - aligner
-      - rabbitmq
-    networks:
-      - backend-network
-    ports:
-      - 450:443
-      - 850:80
-
   backend-read-only-1:
     build: './Parcorpus/'
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING_READ_ONLY}
+      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING}
       - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
       - ELASTIC_URL=${ELASTIC_URL}
       - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
@@ -204,13 +119,9 @@ services:
       - './Parcorpus/src/Parcorpus.API/logs:/app/log'
     depends_on:
       - postgres-1
-      - es01 
-      - grafana
-      - kibana
       - aligner
       - rabbitmq
       - backend-main
-      - backend-mirror
     networks:
       - backend-network
     ports:
@@ -222,7 +133,7 @@ services:
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING_READ_ONLY}
+      - ConnectionStrings__DbConnectionString=${DB_CONNECTION_STRING}
       - WordAlignerConfiguration__WordAlignerServer=${WORD_ALIGNER}
       - ELASTIC_URL=${ELASTIC_URL}
       - QueueConfiguration__ConnectionString=${RABBITMQ_CONNECTION_STRING}
@@ -232,13 +143,9 @@ services:
       - './Parcorpus/src/Parcorpus.API/logs:/app/log'
     depends_on:
       - postgres-1
-      - es01 
-      - grafana
-      - kibana
       - aligner
       - rabbitmq
       - backend-main
-      - backend-mirror
     networks:
       - backend-network
     ports:
@@ -257,8 +164,8 @@ services:
   nginx:
     image: byjg/nginx-extras
     volumes:
-      - ./logs:/var/log/nginx #log файлы.
-      - ./nginx.conf:/etc/nginx/nginx.conf #Конфигурация nginx.
+      - ./logs:/var/log/nginx
+      - ./nginx.conf:/etc/nginx/nginx.conf
       - ./static:/static
       - ./docs:/docs
     working_dir: /parcorpus
@@ -267,21 +174,19 @@ services:
       - "443:443"
     restart:
       always
+    depends_on:
+      - backend-main
     networks:
       - backend-network
   
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-       - ./pgadmin:/var/lib/pgadmin
-       - ./pgadmin_extra_servers.conf:/pgadmin_extra_servers.conf
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    networks:
-      - backend-network
-    restart: unless-stopped
+  # frontend:
+  #   container_name: frontend
+  #   image: parcorpus-frontend:1.0
+  #   depends_on:
+  #     - backend-main
+  #   volumes:
+  #     - 'frontend:/app'
+  #   ports:
+  #     - '5173:5173'
+  #   networks:
+  #     - backend-network

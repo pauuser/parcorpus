@@ -14,8 +14,8 @@ public static class SearchHistoryDbModelFactory
                 sourceLanguageShortName: history.SourceLanguageShortName,
                 destinationLanguageShortName: history.DestinationLanguageShortName,
                 filter: new FilterDbModel(genre: history.Filters.Genre,
-                    startDateTime: history.Filters.StartDateTime,
-                    endDateTime: history.Filters.EndDateTime,
+                    startYear: history.Filters.StartYear,
+                    endYear: history.Filters.EndYear,
                     author: history.Filters.Author)),
             queryTimestampUtc: history.QueryTimestampUtc);
     }
@@ -33,8 +33,8 @@ public static class SearchHistoryDbModelFactory
                 sourceLanguageShortName: query.SourceLanguageShortName,
                 destinationLanguageShortName: query.DestinationLanguageShortName,
                 filter: new FilterDbModel(genre: query.Filter.Genre,
-                    startDateTime: query.Filter.StartDateTime,
-                    endDateTime: query.Filter.EndDateTime,
+                    startYear: query.Filter.StartYear,
+                    endYear: query.Filter.EndYear,
                     author: query.Filter.Author)),
             queryTimestampUtc: queryTimestampUtc ?? new DateTime(2023, 9, 1));
     }

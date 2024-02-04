@@ -30,18 +30,30 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
                 throw new NotFoundException("User with id = {userId} not found, cannot add search history");
             }
 
-            var searchHistory = new SearchHistoryDbModel(searchHistoryId: default,
-                userId: userId,
-                query: new HistoryJsonDbModel(word: query.SourceWord.WordForm,
-                    sourceLanguageShortName: query.SourceWord.Language.ShortName,
-                    destinationLanguageShortName: query.DestinationLanguage.ShortName,
-                    filter: FilterConverter.ConvertAppModelToDbModel(query.Filters)),
-                queryTimestampUtc: DateTime.UtcNow);
-            searchHistory.UserNavigation = user;
-            await _context.SearchHistory.AddAsync(searchHistory);
+            var existingHistory = (await _context.SearchHistory
+                .Where(h => h.UserId == userId)
+                .ToListAsync())
+                .MaxBy(h => h.QueryTimestampUtc);
+            if (existingHistory?.Query.Word == query.SourceWord.WordForm)
+            {
+                Logger.LogInformation("Word {word} is added to history and will not we recorded again for user {userId}", 
+                    query.SourceWord.WordForm, userId);
+            }
+            else
+            {
+                var searchHistory = new SearchHistoryDbModel(searchHistoryId: default,
+                    userId: userId,
+                    query: new HistoryJsonDbModel(word: query.SourceWord.WordForm,
+                        sourceLanguageShortName: query.SourceWord.Language.ShortName,
+                        destinationLanguageShortName: query.DestinationLanguage.ShortName,
+                        filter: FilterConverter.ConvertAppModelToDbModel(query.Filters)),
+                    queryTimestampUtc: DateTime.UtcNow);
+                searchHistory.UserNavigation = user;
+                await _context.SearchHistory.AddAsync(searchHistory);
 
-            await _context.SaveChangesAsync();
-            Logger.LogInformation("Search history record for userId = {userId} was added", userId);
+                await _context.SaveChangesAsync();
+                Logger.LogInformation("Search history record for userId = {userId} was added", userId);
+            }
         }
         catch (NotFoundException)
         {
@@ -59,7 +71,8 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
         try
         {
             var history = _context.SearchHistory
-                .Where(sh => sh.UserId == userId);
+                .Where(sh => sh.UserId == userId)
+                .OrderByDescending(h => h.QueryTimestampUtc);
             var totalCount = await history.CountAsync();
 
             if (paging.Specified)
@@ -73,7 +86,8 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
                 }
 
                 history = history.Skip((paging.PageNumber!.Value - 1) * paging.PageSize!.Value)
-                    .Take(paging.PageSize.Value);
+                    .Take(paging.PageSize.Value)
+                    .OrderByDescending(h => h.QueryTimestampUtc);
             }
 
             var result = await history.ToListAsync();
@@ -89,7 +103,7 @@ public class SearchHistoryRepository : BaseRepository<SearchHistoryRepository>, 
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error during getting search history for userId = {userId}", userId);
+            Logger.LogError(ex, "Error during getting search history for userId = {userId}: {message}", userId, ex.Message);
             throw new SearchHistoryRepositoryException($"Error during getting search history for userId = {userId}");
         }
     }
